@@ -1,0 +1,29 @@
+include ngaro-asm.rx
+
+beginApplication
+
+label: hello
+  "hello, world!" $,
+
+label: wait
+  0 # 0 # out, wait, ;,
+
+label: putc
+  0;, 1 # 2 # out, call: wait ;,
+
+label: (puts)
+  repeat dup, 1 # +, swap, @, 0;, call: putc again ;,
+
+label: puts
+  call: (puts) drop, ;,
+
+label: main
+  hello # call: puts
+  10 # call: putc
+  13 # call: putc
+
+main setEntryPoint
+
+
+"helloImage" saveImageAs
+bye
