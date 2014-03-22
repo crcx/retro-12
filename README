@@ -1,0 +1,13 @@
+Retro is a concatenative, stack-based programming language with
+roots in Forth. It is intended to be clean and practical.
+
+All code, documentation, and any binaries included are provided
+under the ISC License unless otherwise noted in the source. Please
+feel free to take, use, and modify Retro as you see fit.
+
+IMPORTANT:
+
+This is the start of what will eventually become Retro 12. The
+current stable release is Retro 11. Things here are subject to
+change drastically at this point and should not be used for any
+serious applications at this time.
