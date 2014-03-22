@@ -1,0 +1,44 @@
+label: tib
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+
+label: break
+  0 ,
+
+label: getc
+  1 # 1 # out,
+  call: wait
+  1 # in,
+  ;,
+
+label: displayCharacter
+  dup,
+  #8 =if drop, break # @, ;, then
+  dup, call: putc
+  ;,
+
+label: guardAgainstBackspace
+  dup, 1+, tib # <if drop, #tib ;, then 8 # call: putc ;,
+
+label: (accept)
+   repeat
+     call: getc
+     dup, 8 # =if drop, 1-, call: guardAgainstBackspace jump: (accept) then
+     dup, call: putc
+     dup, break # @, =if drop, ;, then
+     swap,
+     dup, 1+, push, !, pop,
+   again ;
+
+label: accept
+  break # !,
+  tib # call: (accept)
+  0 # swap, !, ;,
