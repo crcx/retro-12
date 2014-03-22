@@ -1,0 +1,10 @@
+( requires io-core.na )
+
+label: putc
+  0;, 1 # 2 # out, call: wait ;,
+
+label: (puts)
+  repeat dup, 1 # +, swap, @, 0;, call: putc again ;,
+
+label: puts
+  call: (puts) drop, ;,
