@@ -79,7 +79,7 @@ image [ !target ] [ !origin ] bi
    0 vm: nop,          1 vm: lit,          2 vm: dup,
    3 vm: drop,         4 vm: swap,         5 vm: push,
    6 vm: pop,          7 vm: loop,         8 vm: jump,
-   9 vm: ;,           10 vm: >jump,       11 vm: <jump,
+   9 vm: return,      10 vm: >jump,       11 vm: <jump,
   12 vm: !jump,       13 vm: =jump,       14 vm: @,
   15 vm: !,           16 vm: +,           17 vm: -,
   18 vm: *,           19 vm: /mod,        20 vm: and,

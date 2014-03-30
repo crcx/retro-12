@@ -1,0 +1,179 @@
+: ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ ;
+
+( Retro 12 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+
+include ngaro-asm.rx
+
+beginApplication
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+label: wait
+  0 #
+  0 #
+  out,
+  wait,
+  return,
+
+label: putc
+  0;,
+  1 #
+  2 #
+  out,
+  call: wait
+  return,
+
+label: (puts)
+  repeat dup, 1 # +, swap, @, 0;, call: putc again return,
+
+label: puts
+  call: (puts) drop, return,
+
+( requires console-output.na )
+
+label: inputBuffer
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,  0 ,
+
+label: inputOffset
+  0 ,
+
+label: break
+  0 ,
+
+label: getc
+  1 # 1 # out,
+  call: wait
+  1 # in,
+  return,
+
+
+label: inputOffset++
+  inputOffset # @, 1+, inputOffset # !,
+  return,
+
+
+label: inputOffset--
+  inputOffset # @, 1-, inputOffset # !,
+  return,
+
+
+label: storeIntoBuffer
+  inputBuffer #
+  inputOffset # @,
+  +,
+  !,
+  return,
+
+label: (accept)
+   repeat
+     call: getc
+     dup,
+     call: putc
+     dup, break # @, =if drop, return, then
+     call: storeIntoBuffer
+     call: inputOffset++
+   again ;
+
+label: accept
+  0 #
+  inputOffset #
+  !,
+  break #
+  !,
+  call: (accept)
+  0 #
+  call: storeIntoBuffer
+  return,
+
+
+label: hello
+  "hello, world!" $,
+
+label: fetch
+  @,
+  return,
+
+label: main
+  hello # call: puts
+  10 # call: putc
+  13 # call: putc
+  32 # call: accept
+  10 # call: putc
+  13 # call: putc
+  inputBuffer # call: puts
+  10 # call: putc
+  13 # call: putc
+  32 # call: accept
+  10 # call: putc
+  13 # call: putc
+  inputBuffer # call: puts
+  10 # call: putc
+  13 # call: putc
+  'a # call: putc
+  10 # call: putc
+  13 # call: putc
+  10 # call: putc
+  13 # call: putc
+
+  3 # @,
+  repeat
+    dup, 3 # +, call: puts
+    32 # call: putc
+    @, dup, 0 # =if jump, 9999 , then
+  again
+
+  10 # call: putc
+  13 # call: putc
+  10 # call: putc
+  13 # call: putc
+
+  9999 jump, ,
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+( Dictionary structure  )
+( link to previous      )
+( link to function addr )
+( link to class addr    )
+( length of name        )
+( string with name      )
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ 
+
+here image 3 + !
+
+0 ,
+' putc ,
+0 ,
+4 ,
+"putc" $,
+
+
+image 3 + @
+here image 3 + !
+,
+' fetch ,
+0 ,
+1 ,
+"@" $,
+
+image 3 + @
+here image 3 + !
+,
+' puts ,
+0 ,
+4 ,
+"puts" $,
+
+
+main setEntryPoint
+"retroImage" saveImageAs
+bye
