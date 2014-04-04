@@ -28,7 +28,7 @@ needs files'                               ( library/files.rx )
 
 
 ( Configuration ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-2048 constant IMAGE-SIZE
+8192 constant IMAGE-SIZE
 
 
 ( Create Image Buffer ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
@@ -98,10 +98,12 @@ image [ !target ] [ !origin ] bi
 
 : call:  ( "-  ) ' , ;
 : jump:  ( "-  ) jump, ' , ;
-: repeat (  -a ) here ;
-: again  ( a-  ) jump, , ;
+: REPEAT (  -a ) here ;
+: AGAIN  ( a-  ) jump, , ;
 
 : setEntryPoint ( a- )  image 1 + ! ;
+
+: setAddressTo ( a- ) !target ;
 
 : beginApplication
   jump, 0 ,
