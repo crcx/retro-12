@@ -7,10 +7,22 @@
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
 include ngaro-asm.rx
+
 devector keymap:handler
+
+: last-entry
+  image 3 + ;
+
+: assignName:
+  here [ last-entry @ , , , 0 , getToken $, ] dip last-entry ! ;
+
+: vector
+  nop, nop, ;
 
 beginApplication
 
+3 setAddressTo
+here putn
 label: last      0 ,
 label: heap      0 ,
 label: compiler  0 ,
@@ -23,163 +35,204 @@ label: fh        0 ,
 label: cw        0 ,
 label: ch        0 ,
 
+32 setAddressTo
+here putn
 label: copytag   "Retro" $,
 label: version   "11.6" $,
-label: build     "2014.04.01" $,
+label: build     "2014.04.05" $,
 label: okmsg     "ok  " $,
 
 label: comma
+  vector
   heap # @, dup, 1+, push, !, pop, heap # !,
   return,
 
 label: withClass
+  vector
   1-, push,
   return,
 
 label: .word
+  vector
   compiler # @, 0 # !if call: comma return, then jump: withClass
 
 label: .macro
+  vector
   jump: withClass
 
 label: .data
+  vector
   compiler # @, 0;, drop, 1 # call: comma call: comma
   return,
 
 label: .primitive  (  a- )
+  vector
     dup, @, 0 # =if compiler # @, -1 # =if 2 # +, @, then then jump: .word
 
 label: dup
+  vector
   dup,
   return,
 
 label: 1+
+  vector
   1+,
   return,
 
 label: 1-
+  vector
   1-,
   return,
 
 label: swap
+  vector
   swap,
   return,
 
 label: drop
+  vector
   drop,
   return,
 
 label: and
+  vector
   and,
   return,
 
 label: or
+  vector
   or,
   return,
 
 label: xor
+  vector
   xor,
   return,
 
 label: @
+  vector
   @,
   return,
 
 label: !
+  vector
   !,
   return,
 
 label: +
+  vector
   +,
   return,
 
 label: -
+  vector
   -,
   return,
 
 label: *
+  vector
   *,
   return,
 
 label: /mod
+  vector
   /mod,
   return,
 
 label: <<
+  vector
   <<,
   return,
 
 label: >>
+  vector
   >>,
   return,
 
 label: out
+  vector
   out,
   return,
 
 label: in
+  vector
   in,
   return,
 
 label: wait
+  vector
   0 # 0 # out, wait,
   return,
 
 label: over
+  vector
   push, dup, pop, swap,
   return,
 
 label: not
+  vector
   -1 # xor,
   return,
 
 label: on
+  vector
   -1 # swap, !,
   return,
 
 label: off
+  vector
   0 # swap, !,
   return,
 
 label: /
+  vector
   /mod, swap, drop,
   return,
 
 label: mod
+  vector
   /mod, drop,
   return,
 
 label: negate
+  vector
   -1 # *,
   return,
 
 label: do
+  vector
   1-, push,
   return,
 
 label: @+
+  vector
   dup, 1+, swap, @,
   return,
 
 label: !+
+  vector
   dup, 1+, push, !, pop,
   return,
 
 label: here
+  vector
   heap # @,
   return,
 
 label: ;;
+  vector
   9 # call: comma
   return,
 
 label: ;
+  vector
   call: ;;
   compiler #
   call: off
   return,
 
 label: ($,)
+  vector
   REPEAT
     call: @+
     0;,
@@ -188,26 +241,32 @@ label: ($,)
   return,
 
 label: $
+  vector
   drop, 0 # call: comma
   return,
 
 label: push
+  vector
   5 # call: comma
   return,
 
 label: pop
+  vector
   6 # call: comma
   return,
 
 label: 0;
+  vector
   25 # call: comma
   return,
 
 label: repeat
+  vector
   call: here
   return,
 
 label: again
+  vector
   8 #
   call: comma
   call: comma
@@ -217,21 +276,25 @@ label: update
   -1 ,
 
 label: redraw
+  vector
   update # @, 0;, drop, 0 # 3 # out,
   return,
 
 label: putc
+  vector
   0;, 1 # 2 # out,
   call: wait
   call: redraw
   return,
 
 label: cr
+  vector
   10 #
   call: putc
   return,
 
 label: (puts)
+  vector
   REPEAT
     call: @+
     0;,
@@ -240,11 +303,13 @@ label: (puts)
   return,
 
 label: <puts>
+  vector
   call: (puts)
   drop,
   return,
 
 label: puts
+  vector
   call: <puts>
   return,
 
@@ -283,14 +348,17 @@ label: keymap:TABLE
   0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
 
 label: STRING-LENGTH
+  vector
   256 #
   return,
 
 label: STRING-BUFFERS
+  vector
   12 #
   return,
 
 label: tib
+  vector
   memory #
   @,
   call: STRING-LENGTH
@@ -298,9 +366,11 @@ label: tib
   return,
 
 label: remapKeys
+  vector
   return,
 
 label: remap:whitespace
+  vector
    dup,  127 # =if drop,  8 # then
    dup,   13 # =if drop, 10 # then
    remapping # @, 0;, drop,
@@ -309,12 +379,14 @@ label: remap:whitespace
    return,
 
 label: getc:unfiltered
+  vector
    1 # 1 # out,
    call: wait
    1 # in,
    return,
 
 label: getc:with/remap
+  vector
   REPEAT
     call: getc:unfiltered
     call: remapKeys
@@ -324,9 +396,11 @@ label: getc:with/remap
   return,
 
 label: keymap:handler
+  vector
   return,
 
 label: getc
+  vector
   REPEAT
     call: getc:unfiltered
     call: keymap:handler
@@ -343,10 +417,12 @@ label: getc
 
 
 label: putc?
+  vector
   dup,
   8 # =if drop, break # @, return, then dup, call: putc return,
 
 label: eat
+  vector
    eatLeading? # @, 0;, drop,
    REPEAT
      call: getc
@@ -359,6 +435,7 @@ label: eat
   return,
 
 label: guard?
+  vector
   dup,
   1+,
   call: tib
@@ -366,6 +443,7 @@ label: guard?
   return,
 
 label: (accept)
+  vector
   REPEAT
     call: getc
     dup, 8 # =if drop, 1-, call: guard? jump: (accept) then
@@ -378,6 +456,7 @@ label: (accept)
   return,
 
 label: accept
+  vector
   break # !,
   call: tib
   call: eat
@@ -388,26 +467,31 @@ label: accept
   drop,
   return,
 
-label: vector
+label: is-vector
   -1 ,
 
 label: d->class
+  vector
   1+,
   return,
 
 label: d->xt
+  vector
   1+, 1+,
   return,
 
 label: d->doc
+  vector
   3 # +,
   return,
 
 label: d->name
+  vector
   4 # +,
   return,
 
 label: header
+  vector
   push,
   call: here        ( Entry Start      )
   last # @,         ( Link to previous )
@@ -426,6 +510,7 @@ label: header
   swap, !, return,  ( Patch XT to HERE )
 
 label: create
+  vector
   32 #
   call: accept
   call: tib
@@ -433,17 +518,19 @@ label: create
   return,
 
 label: [[
+  vector
   compiler #
   call: off
   return,
 
 label: ]]
+  vector
   compiler #
-  call: on
-  return,
+  jump: on
 
 label: vector?
-  vector # @,
+  vector
+  is-vector # @,
   0;, drop,
   0 #
   call: comma
@@ -452,22 +539,24 @@ label: vector?
   return,
 
 label: :
+  vector
   call: create
   .word #
   last #
   @,
   call: d->class
   !,
-  call: ]]
   call: vector?
-  return,
+  jump: ]]
 
 label: t-(
+  vector
   ') #
   call: accept
   return,
 
 label: quote       ( -a  ) ( -- runtime -------------------------------- )
+  vector
   pop, 1+,         (   -a  | grab the return address, add 1, and )
   dup,             (  a-aa | dup, giving two pointers to ADDR    )
   @,               ( aa-aA | dereference one for actual target   )
@@ -476,7 +565,8 @@ label: quote       ( -a  ) ( -- runtime -------------------------------- )
   1+, return,      (  a-a  | point to start of code, jump to end )
 
 label: [         ( -- compile-time---------------------------- )
-  ' quote #      (   -   | compile a call to quote             )
+  vector
+  quote #      (   -   | compile a call to quote             )
   call: comma
   call: here     (   -a  | remember where to put ADDR          )
   0 #            (  a-a  | leave a cell to hold it later       )
@@ -487,6 +577,7 @@ label: [         ( -- compile-time---------------------------- )
   return,
 
 label: ]         ( a = placeholder for quote jump, f = old compile state  )
+  vector
    call: ;;      ( af-af | compile a return from quoted code   )
    compiler # !, ( af-a  | restore compiler state              )
    call: here    (  a-aA | now we know what ADDR should be     )
@@ -503,29 +594,44 @@ label: ]         ( a = placeholder for quote jump, f = old compile state  )
 
 label: empty return,
 
-label: if push, swap, pop, swap, 0 # !if drop, call: do return, then swap, drop, call: do return,
+label: if
+  vector
+  push, swap, pop, swap, 0 # !if drop, call: do return, then swap, drop, call: do return,
 
-label: ifTrue empty # call: if return,
+label: ifTrue
+  vector
+  empty # call: if return,
 
-label: ifFalse empty # swap, call: if return,
+label: ifFalse
+  vector
+  empty # swap, call: if return,
 
-label: dip swap, push, call: do pop, return,
+label: dip
+  vector
+  swap, push, call: do pop, return,
 
-label: sip call: over do # call: dip return,
+label: sip
+  vector
+  call: over do # call: dip return,
 
-label: false 0 # return,
+label: false
+  vector
+  0 # return,
 
-label: true -1 # return,
+label: true
+  vector
+  -1 # return,
 
-label: =  ( xy-f  ) =if jump: true  then jump: false
-label: <> ( xy-f  ) !if jump: true  then jump: false
-label: >= ( xy-f  ) >if jump: true  then jump: false
-label: <= ( xy-f  ) <if jump: true  then jump: false
-label: <  ( xy-f  ) >if jump: false then jump: true
-label: >  ( xy-f  ) <if jump: false then jump: true
+label: =  ( xy-f  ) vector =if jump: true  then jump: false
+label: <> ( xy-f  ) vector !if jump: true  then jump: false
+label: >= ( xy-f  ) vector >if jump: true  then jump: false
+label: <= ( xy-f  ) vector <if jump: true  then jump: false
+label: <  ( xy-f  ) vector >if jump: false then jump: true
+label: >  ( xy-f  ) vector <if jump: false then jump: true
 
 
 label: compare
+  vector 
    REPEAT
      dup, @, push, 1+, swap,
      dup, @, push, 1+, pop, dup, pop,
@@ -534,6 +640,7 @@ label: compare
    drop, drop, -1 # return,
 
 label: count
+  vector 
   REPEAT
     call: @+
     0;,
@@ -542,6 +649,7 @@ label: count
   return,
 
 label: getLength
+  vector 
   dup,
   call: count
   1-,
@@ -550,11 +658,13 @@ label: getLength
   return,
 
 label: withLength
+  vector 
   dup,
   call: getLength
   return,
 
 label: string
+  vector 
   pop,
   call: count
   1-,
@@ -562,6 +672,7 @@ label: string
   return,
 
 label: keepString
+  vector 
   string #
   call: comma
   call: here
@@ -570,6 +681,7 @@ label: keepString
   return,
 
 label: :devector
+  vector 
   0 #
   swap,
   call: !+
@@ -579,6 +691,7 @@ label: :devector
   return,
 
 label: :is
+  vector 
   8 #
   swap,
   call: !+
@@ -586,6 +699,7 @@ label: :is
   return,
 
 label: atib
+  vector 
   memory # @,
   call: STRING-LENGTH
   2 #
@@ -594,6 +708,7 @@ label: atib
   return,
 
 label: t-"
+  vector 
   atib #
   tib #
   call: :is
@@ -623,15 +738,18 @@ label: numbers
   "0123456789ABCDEF" $,
 
 label: nums
+  vector 
   numbers #
   return,
 
 label: @base
+  vector 
   base #
   @,
   return,
 
 label: (digits)
+  vector 
   call: nums
   +,
   @,
@@ -643,6 +761,7 @@ label: (digits)
   return,
 
 label: digits
+  vector 
   1-,
   REPEAT
     dup,
@@ -655,6 +774,7 @@ label: digits
   return,
 
 label: valid?
+  vector 
   call: @base
   dup,
   16 #
@@ -666,6 +786,7 @@ label: valid?
   return,
 
 label: digit?
+  vector 
   num #
   call: off
   call: valid?
@@ -675,6 +796,7 @@ label: digit?
   return,
 
 label: toDigit
+  vector 
   '0 #
   -,
   call: @base
@@ -690,6 +812,7 @@ label: toDigit
   return,
 
 label: isNegative?
+  vector 
   dup,
   @,
   '- #
@@ -705,20 +828,25 @@ label: isNegative?
   return,
 
 label: (convert)
+  vector 
   REPEAT
     dup, @, 0;, call: toDigit #value # @, call: @base *, +, #value # !, 1+,
   AGAIN return,
 
 label: toNumber
+  vector 
   call: isNegative? 0 # #value # !, call: (convert) drop, #value # @, negate? # @, *, return,
 
 label: (isnumber)
+  vector 
   REPEAT dup, @, 0;, call: digit? flag # @, and, flag # !, 1+, AGAIN return,
 
 label: isNumber?
+  vector 
   call: isNegative? flag # call: on call: (isnumber) drop, flag # @, return,
 
 label: boot
+  vector 
   copytag #
   call: puts
   32 #
@@ -729,6 +857,7 @@ label: boot
   return,
 
 label: query
+  vector 
   5 #
   out,
   call: wait
@@ -736,6 +865,7 @@ label: query
   return,
 
 label: run-on-boot
+  vector 
    -1  # call: query memory # !,  ( Memory Size     )
    -2  # call: query fb #     !,  ( Canvas Present? )
    -3  # call: query fw #     !,  ( Canvas Width    )
@@ -751,6 +881,7 @@ label: found
   0 ,
 
 label: prepare
+  vector 
   found #
   call: off
   name #
@@ -760,6 +891,7 @@ label: prepare
   return,
 
 label: done
+  vector 
   which #
   @,
   found #
@@ -767,6 +899,7 @@ label: done
   return,
 
 label: match?
+  vector 
   dup,
   call: d->name
   name #
@@ -775,6 +908,7 @@ label: match?
   return,
 
 label: <search>
+  vector 
   REPEAT
     call: match?
     0 #
@@ -791,12 +925,14 @@ label: <search>
   return,
 
 label: find
+  vector 
   call: prepare
   call: <search>
   call: done
   return,
 
 label: '
+  vector 
   32 #
   call: accept
   call: tib
@@ -815,9 +951,11 @@ label: ___
   "___" $,
 
 label: get
+  vector 
   dup, @, ___ # 2 # +, !, 1+, return,
 
 label: xt:class
+  vector 
   dup,
   call: d->xt
   @,
@@ -827,6 +965,7 @@ label: xt:class
   return,
 
 label: try
+  vector 
   call: tib
   call: get
   call: find
@@ -850,6 +989,7 @@ label: try
   return,
 
 label: <notFound>
+  vector 
   call: tib
   call: getLength
   2 #
@@ -859,6 +999,7 @@ label: <notFound>
   return,
 
 label: notFound
+  vector 
   call: <notFound>
   0;,
   drop,
@@ -873,6 +1014,7 @@ label: notFound
   return,
 
 label: ok
+  vector 
   compiler #
   @,
   call: not
@@ -884,12 +1026,14 @@ label: ok
   return,
 
 label: build#
+  vector 
   call: tib
   call: toNumber
   .data #
   jump: withClass
 
 label: number
+  vector 
   call: tib
   call: isNumber?
   0 #
@@ -899,6 +1043,7 @@ label: number
   jump: notFound
 
 label: process
+  vector 
   0 #
   !if
     call: xt:class
@@ -908,6 +1053,7 @@ label: process
   jump: number
 
 label: listen
+  vector 
   REPEAT
     call: ok
     32 #
@@ -919,6 +1065,7 @@ label: listen
   return,
 
 label: save-image
+  vector 
   1 #
   4 #
   out,
@@ -926,22 +1073,166 @@ label: save-image
   return,
 
 label: goodbye
+  vector 
   call: cr
   -9 # 5 # out,
   call: wait
   return,
 
+( _-_-_-_-_-_-_-_-_-_-_-_-_-_ )
+
+
+label: words
+  vector 
+  last #
+  @,
+  REPEAT
+    0;,
+    dup,
+    call: d->name
+    call: puts
+    32 #
+    call: putc
+    @,
+  AGAIN
+  return,
+
 label: main
+  vector 
   call: run-on-boot
+  call: words
   jump: listen
 
+
+words .word assignName: words
+
+dup .word assignName: dup
+1+ .word assignName: 1+
+1- .word assignName: 1-
+swap .word assignName: swap
+drop .word assignName: drop
+and .word assignName: and
+or .word assignName: or
+xor .word assignName: xor
+@ .word assignName: @
+! .word assignName: !
++ .word assignName: +
+- .word assignName: -
+* .word assignName: *
+/mod .word assignName: /mod
+<< .word assignName: <<
+>> .word assignName: >>
+out .word assignName: out
+in .word assignName: in
+= .word assignName: =
+<> .word assignName: <>
+>= .word assignName: >=
+<= .word assignName: <=
+> .word assignName: >
+< .word assignName: <
+wait .word assignName: wait
+over .word assignName: over
+not .word assignName: not
+on .word assignName: on
+off .word assignName: off
+/ .word assignName: /
+mod .word assignName: mod
+negate .word assignName: negate
+do .word assignName: do
+@+ .word assignName: @+
+!+ .word assignName: !+
+here .word assignName: here
+redraw .word assignName: redraw
+putc .word assignName: putc
+cr .word assignName: cr
+<puts> .word assignName: <puts>
+puts .word assignName: puts
+STRING-LENGTH .word assignName: STRING-LENGTH
+STRING-BUFFERS .word assignName: STRING-BUFFERS
+tib .word assignName: tib
+remapKeys .word assignName: remapKeys
+remap:whitespace .word assignName: remap:whitespace
+getc:unfiltered .word assignName: getc:unfiltered
+getc:with/remap .word assignName: getc:with/remap
+keymap:handler .word assignName: keymap:handler
+getc .word assignName: getc
+accept .word assignName: accept
+d->class .word assignName: d->class
+d->xt .word assignName: d->xt
+d->doc .word assignName: d->doc
+d->name .word assignName: d->name
+
+
+keymap:PREFIX .data assignName: keymap:PREFIX
+keymap:TABLE .data assignName: keymap:TABLE
+last         .data assignName: last
+compiler     .data assignName: compiler
+fb           .data assignName: fb
+fw           .data assignName: fw
+fh           .data assignName: fh
+memory       .data assignName: memory
+cw           .data assignName: cw
+ch           .data assignName: ch
+heap         .data assignName: heap
+which        .data assignName: which
+remapping    .data assignName: remapping
+eatLeading?  .data assignName: eatLeading?
+base         .data assignName: base
+update       .data assignName: update
+version      .data assignName: version
+build        .data assignName: build
+is-vector    .data assignName: vector
+tabAsWhitespace .data assignName: tabAsWhitespace
+
+;;      .macro assignName: ;;
+;       .macro assignName: ;
+push    .macro assignName: push
+pop     .macro assignName: pop
+0;      .macro assignName: 0;
+repeat  .macro assignName: repeat
+again   .macro assignName: again
+[[      .macro assignName: [[
+t-(     .macro assignName: (
+[       .macro assignName: [
+]       .macro assignName: ]
+header .word assignName: header
+create .word assignName: create
+]] .word assignName: ]]
+: .word assignName: :
+quote .word assignName: quote
+if .word assignName: if
+ifTrue .word assignName: ifTrue
+ifFalse .word assignName: ifFalse
+dip .word assignName: dip
+sip .word assignName: sip
+compare .word assignName: compare
+getLength .word assignName: getLength
+withLength .word assignName: withLength
+string .word assignName: string
+keepString .word assignName: keepString
+:devector .word assignName: :devector
+:is .word assignName: :is
+atib .word assignName: atib
+t-" .word assignName: "
+nums .word assignName: numbers
+toNumber .word assignName: toNumber
+isNumber? .word assignName: isNumber?
+boot .word assignName: boot
+find .word assignName: find
+' .word assignName: '
+notFound .word assignName: notFound
+ok .word assignName: ok
+listen .word assignName: listen
+save-image .word assignName: save
+goodbye .word assignName: bye
+comma .word assignName: ,
+withClass .word assignName: withClass
+.word .word assignName: .word
+.macro .word assignName: .macro
+.data .word assignName: .data
+.primitive .word assignName: .primitive 
 
 main setEntryPoint
 "retroImage" saveImageAs
 .s
 bye
-
-
-
-
-( Word Prefixes and "Not Found" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
