@@ -326,12 +326,18 @@ label: getc:with/remap
 label: keymap:handler
   return,
 
-label: getc getc
+label: getc
   REPEAT
     call: getc:unfiltered
     call: keymap:handler
     call: remapKeys
-    dup, 0 # !if call: remap:whitespace return, then drop,
+    dup,
+    0 #
+    !if
+      call: remap:whitespace
+      return,
+    then
+    drop,
   AGAIN
   return,
 
@@ -339,7 +345,6 @@ label: getc getc
 label: putc?
   dup,
   8 # =if drop, break # @, return, then dup, call: putc return,
-
 
 label: eat
    eatLeading? # @, 0;, drop,
@@ -361,15 +366,16 @@ label: guard?
   return,
 
 label: (accept)
-   REPEAT
-     call: getc
-     dup, 8 # =if drop, 1-, guard? jump: (accept) then
-     dup,
-     call: putc
-     dup, break # @, =if drop, return, then
-     swap,
-     call: !+
-   AGAIN return,
+  REPEAT
+    call: getc
+    dup, 8 # =if drop, 1-, call: guard? jump: (accept) then
+    dup,
+    call: putc
+    dup, break # @, =if drop, return, then
+    swap,
+    call: !+
+  AGAIN
+  return,
 
 label: accept
   break # !,
@@ -461,60 +467,30 @@ label: t-(
   call: accept
   return,
 
+label: quote       ( -a  ) ( -- runtime -------------------------------- )
+  pop, 1+,         (   -a  | grab the return address, add 1, and )
+  dup,             (  a-aa | dup, giving two pointers to ADDR    )
+  @,               ( aa-aA | dereference one for actual target   )
+  1-,              ( aa-aA | subtract 1 because ip++ in ngaro vm )
+  push,            ( aA-a  | push result to do a calculated jump )
+  1+, return,      (  a-a  | point to start of code, jump to end )
 
-( main setEntryPoint )
-"retroImage" saveImageAs
-.s
-bye
-
-
-
-
-
-
-
-
-
-
-( Colon Compiler ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-
-( Quotes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-
-( reference diagram:                                           )
-(                                                              )
-(  step       generated code.                                  )
-(  -------    ----------------                                 )
-(  [          <quote> 0000                                     )
-(  [ 5        <quote> 0000 <lit> 0005                          )
-(  [ 5 ]      <quote> ADDR <lit> 0005 <ret>                    )
-(                                                              )
-( ADDR will be same as "here" immediately after compilation    )
-(                                                              )
-( <quote> is the xt for "quote" - 711 as of retro 11.5 . This  )
-( changes with kernel/meta.rx but the number should always be  )
-( the same as both:  ' quote     and:  d' quote @d->xt         )
-
-label: quote quote ( -a  ) ( -- runtime -------------------------------- )
-  pop, 1+        (   -a  | grab the return address, add 1, and )
-  dup,           (  a-aa | dup, giving two pointers to ADDR    )
-  @,             ( aa-aA | dereference one for actual target   )
-  1-,            ( aa-aA | subtract 1 because ip++ in ngaro vm )
-  push,          ( aA-a  | push result to do a calculated jump )
-  1+, return,          (  a-a  | point to start of code, jump to end )
-
-m: [ [ ( -a )      ( -- compile-time---------------------------- )
-  ' quote # ,    (   -   | compile a call to quote             )
-  here           (   -a  | remember where to put ADDR          )
-  0 # ,          (  a-a  | leave a cell to hold it later       )
+label: [         ( -- compile-time---------------------------- )
+  ' quote #      (   -   | compile a call to quote             )
+  call: comma
+  call: here     (   -a  | remember where to put ADDR          )
+  0 #            (  a-a  | leave a cell to hold it later       )
+  call: comma
   compiler # @,  (  a-af | store current compiler state        )
-  compiler # on  ( af-af | turn the compiler on                )
+  compiler #     ( af-af | turn the compiler on                )
+  call: on
   return,
 
-m: ] ] ( af- ) ( a = placeholder for quote jump, f = old compile state  )
-   ;;            ( af-af | compile a return from quoted code   )
+label: ]         ( a = placeholder for quote jump, f = old compile state  )
+   call: ;;      ( af-af | compile a return from quoted code   )
    compiler # !, ( af-a  | restore compiler state              )
-   here          (  a-aA | now we know what ADDR should be     )
-   over !,       ( aA-a  | so go replace the 00                )
+   call: here    (  a-aA | now we know what ADDR should be     )
+   call: over !, ( aA-a  | so go replace the 00                )
    compiler # @, (  a-af | recall current compile state        )
    0 # =if       ( af-a  | are we outside of the compiler?     )
                  ( -- runtime -------------------------------- )
@@ -524,188 +500,448 @@ m: ] ] ( af- ) ( a = placeholder for quote jump, f = old compile state  )
                  (       | the call to 'quote will restore it  )
                  (       | when the containing function runs   )
 
-( Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-i: empty return,
-( [ - ] internal helper corresponding to an empty quote )
 
-label: if if push, swap, pop, swap, 0 # !if drop, do return, then swap, drop, do return,
+label: empty return,
 
-label: ifTrue ifTrue   ' empty # if return,
+label: if push, swap, pop, swap, 0 # !if drop, call: do return, then swap, drop, call: do return,
 
-label: ifFalse ifFalse ' empty # swap, if return,
+label: ifTrue empty # call: if return,
 
-label: dip dip swap, push, do pop, return,
+label: ifFalse empty # swap, call: if return,
 
-label: sip sip over ' do # dip return,
+label: dip swap, push, call: do pop, return,
 
-( Conditionals ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-i: false (  -n  )  0 # return,
-( [ -f ] helper, returns 0 for false )
+label: sip call: over do # call: dip return,
 
-i: true  (  -n  ) -1 # return,
-( [ -f ] helper, returns -1 for true )
+label: false 0 # return,
 
-label: =  =  ( xy-f  ) =if jump: true  then jump: false
+label: true -1 # return,
 
-label: == == = return,
+label: =  ( xy-f  ) =if jump: true  then jump: false
+label: <> ( xy-f  ) !if jump: true  then jump: false
+label: >= ( xy-f  ) >if jump: true  then jump: false
+label: <= ( xy-f  ) <if jump: true  then jump: false
+label: <  ( xy-f  ) >if jump: false then jump: true
+label: >  ( xy-f  ) <if jump: false then jump: true
 
-label: <> <>  ( xy-f  ) !if jump: true  then jump: false
 
-label: != != <> return,
-
-label: >= >=  ( xy-f  ) >if jump: true  then jump: false
-
-label: <= <=  ( xy-f  ) <if jump: true  then jump: false
-
-label: < <    ( xy-f  ) >if jump: false then jump: true
-
-label: > >    ( xy-f  ) <if jump: false then jump: true
-
-( Strings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-label: compare compare
+label: compare
    REPEAT
      dup, @, push, 1+, swap,
      dup, @, push, 1+, pop, dup, pop,
      !if drop, drop, dup, xor, return, then
-   0 # 12 m, m,
+   0 # 12 , ,
    drop, drop, -1 # return,
 
-i: count REPEAT @+ 0;, drop, AGAIN return,
-( [ a-a ] internal helper for getting string length )
+label: count
+  REPEAT
+    call: @+
+    0;,
+    drop,
+  AGAIN
+  return,
 
-label: getLength getLength   ( a-n ) dup, count 1-, swap, -, return,
+label: getLength
+  dup,
+  call: count
+  1-,
+  swap,
+  -,
+  return,
 
-label: withLength withLength  ( a-an ) dup, getLength return,
+label: withLength
+  dup,
+  call: getLength
+  return,
 
-label: string string      ( -   ) pop, count 1-, push, return,
+label: string
+  pop,
+  call: count
+  1-,
+  push,
+  return,
 
-label: keepString keepString  ( a-a ) ' string # , here swap, $ return,
+label: keepString
+  string #
+  call: comma
+  call: here
+  swap,
+  call: $
+  return,
 
-label: :devector :devector ( a-  ) 0 # swap, !+ 0 # swap !, return,
+label: :devector
+  0 #
+  swap,
+  call: !+
+  0 #
+  swap,
+  !,
+  return,
 
-label: :is :is      ( aa- ) 8 # swap, !+ !, return,
+label: :is
+  8 #
+  swap,
+  call: !+
+  !,
+  return,
 
-label: atib atib memory # @, STRING-LENGTH 2 # * - return,
+label: atib
+  memory # @,
+  call: STRING-LENGTH
+  2 #
+  *,
+  -,
+  return,
 
-label: " t-" ' atib # ' tib # :is '" # accept ' tib # :devector atib return,
+label: t-"
+  atib #
+  tib #
+  call: :is
+  '" #
+  call: accept
+  tib #
+  call: :devector
+  call: atib
+  return,
 
-( Numbers [Parsing & Display] ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-4 elements #value num negate? flag
+label: #value
+  0 ,
 
-10 variable: base
+label: num
+  0 ,
 
-label: numbers "0123456789ABCDEF" $,
+label: negate?
+  0 ,
 
-label: numbers nums     ( -a ) numbers # return,
+label: flag
+  0 ,
 
-i: @base    ( -n ) base # @, return,
-( [ -n ] helper function, returns value stored in **base** )
+label: base
+  10 ,
 
-i: (digits) nums +, @, over =if num # on then return,
-( NEEDS-DESCRIPTION )
+label: numbers
+  "0123456789ABCDEF" $,
 
-i: digits   1-, REPEAT dup, push, (digits) pop, 0;, 1-, AGAIN return,
-( NEEDS-DESCRIPTION )
+label: nums
+  numbers #
+  return,
 
-i: valid?   @base dup, 16 # <if digits return, then drop, return,
-( NEEDS-DESCRIPTION )
+label: @base
+  base #
+  @,
+  return,
 
-i: digit?   num # off valid? drop, num # @, return,
-( NEEDS-DESCRIPTION )
+label: (digits)
+  call: nums
+  +,
+  @,
+  call: over
+  =if
+    num #
+    call: on
+  then
+  return,
 
-i: toDigit  ( c-n ) '0 # -, @base 16 # =if dup, 16 # >if 7 # -, then then return,
-( NEEDS-DESCRIPTION )
+label: digits
+  1-,
+  REPEAT
+    dup,
+    push,
+      call: (digits)
+    pop,
+    0;,
+    1-,
+  AGAIN
+  return,
 
-i: isNegative? ( a-a )
-   dup, @, '- # =if negate? # on 1+, return, then 1 # negate? # !, return,
-( NEEDS-DESCRIPTION )
+label: valid?
+  call: @base
+  dup,
+  16 #
+  <if
+    call: digits
+    return,
+  then
+  drop,
+  return,
 
-i: (convert)
-   REPEAT
-     dup, @, 0;, toDigit #value # @, @base *, +, #value # !, 1+,
-   AGAIN return,
-( NEEDS-DESCRIPTION )
+label: digit?
+  num #
+  call: off
+  call: valid?
+  drop,
+  num #
+  @,
+  return,
 
-label: toNumber toNumber ( $-n )
-   isNegative? 0 # #value # !, (convert) drop, #value # @, negate? # @, *, return,
+label: toDigit
+  '0 #
+  -,
+  call: @base
+  16 #
+  =if
+    dup,
+    16 #
+    >if
+      7 #
+      -,
+    then
+  then
+  return,
 
-i: (isnumber)
-   REPEAT dup, @, 0;, digit? flag # @, and, flag # !, 1+, AGAIN return,
-( NEEDS-DESCRIPTION )
+label: isNegative?
+  dup,
+  @,
+  '- #
+  =if
+    negate? #
+    call: on
+    1+,
+    return,
+  then
+  1 #
+  negate? #
+  !,
+  return,
 
-label: isNumber? isNumber? ( $-f ) isNegative? flag # on (isnumber) drop, flag # @, return,
+label: (convert)
+  REPEAT
+    dup, @, 0;, call: toDigit #value # @, call: @base *, +, #value # !, 1+,
+  AGAIN return,
 
-( Startup ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-label: boot boot         (  -  )
-   copytag # puts 32 # putc version # puts cr return,
+label: toNumber
+  call: isNegative? 0 # #value # !, call: (convert) drop, #value # @, negate? # @, *, return,
 
-i: query        ( n-n ) 5 # out, wait 5 # in, return,
-( NEEDS-DESCRIPTION )
+label: (isnumber)
+  REPEAT dup, @, 0;, call: digit? flag # @, and, flag # !, 1+, AGAIN return,
 
-i: run-on-boot  (  -  )
-   -1  # query memory # !,  ( Memory Size     )
-   -2  # query fb #     !,  ( Canvas Present? )
-   -3  # query fw #     !,  ( Canvas Width    )
-   -4  # query fh #     !,  ( Canvas Height   )
-   -11 # query cw #     !,  ( Console Width   )
-   -12 # query ch #     !,  ( Console Height  )
-   boot return,
-( NEEDS-DESCRIPTION )
+label: isNumber?
+  call: isNegative? flag # call: on call: (isnumber) drop, flag # @, return,
 
-( Dictionary Search ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-2 elements name found
+label: boot
+  copytag #
+  call: puts
+  32 #
+  call: putc
+  version #
+  call: puts
+  call: cr
+  return,
 
-i: prepare  ( a-a  ) found # off name # !, last # @, return,
-( NEEDS-DESCRIPTION )
+label: query
+  5 #
+  out,
+  call: wait
+  5 # in,
+  return,
 
-i: done     (  -af ) which # @, found # @, return,
-( NEEDS-DESCRIPTION )
+label: run-on-boot
+   -1  # call: query memory # !,  ( Memory Size     )
+   -2  # call: query fb #     !,  ( Canvas Present? )
+   -3  # call: query fw #     !,  ( Canvas Width    )
+   -4  # call: query fh #     !,  ( Canvas Height   )
+   -11 # call: query cw #     !,  ( Console Width   )
+   -12 # call: query ch #     !,  ( Console Height  )
+   call: boot return,
 
-i: match?   ( $-$f ) dup, d->name name # @, compare return,
-( NEEDS-DESCRIPTION )
+label: name
+  0 ,
 
-i: <search> ( $-   )
-   REPEAT match? 0 # !if which # !, found # on return, then @ 0;, AGAIN return,
-( NEEDS-DESCRIPTION )
+label: found
+  0 ,
 
-label: find find     ( $-af ) prepare <search> done return,
+label: prepare
+  found #
+  call: off
+  name #
+  !,
+  last #
+  @,
+  return,
 
-label: ' t-'      ( "-a  ) 32 # accept tib find 0 # !if d->xt @, return, then drop, 0 # return,
+label: done
+  which #
+  @,
+  found #
+  @,
+  return,
+
+label: match?
+  dup,
+  call: d->name
+  name #
+  @,
+  call: compare
+  return,
+
+label: <search>
+  REPEAT
+    call: match?
+    0 #
+    !if
+      which #
+      !,
+      found #
+      call: on
+      return,
+    then
+    @,
+    0;,
+  AGAIN
+  return,
+
+label: find
+  call: prepare
+  call: <search>
+  call: done
+  return,
+
+label: '
+  32 #
+  call: accept
+  call: tib
+  call: find
+  0 #
+  !if
+    call: d->xt
+    @,
+    return,
+  then
+  drop,
+  0 #
+  return,
+
+label: ___
+  "___" $,
+
+label: get
+  dup, @, ___ # 2 # +, !, 1+, return,
+
+label: xt:class
+  dup,
+  call: d->xt
+  @,
+  swap,
+  call: d->class
+  @,
+  return,
+
+label: try
+  call: tib
+  call: get
+  call: find
+  0 #
+  !if
+    call: d->xt
+    @,
+    ___ #
+    call: find
+    0 #
+    !if
+      call: xt:class
+      call: withClass
+      0 #
+      return,
+    then
+    drop,
+  then
+  drop,
+  -1 #
+  return,
+
+label: <notFound>
+  call: tib
+  call: getLength
+  2 #
+  >if
+    call: try
+  then
+  return,
+
+label: notFound
+  call: <notFound>
+  0;,
+  drop,
+  call: cr
+  call: tib
+  call: puts
+  32 #
+  call: putc
+  '? #
+  call: putc
+  call: cr
+  return,
+
+label: ok
+  compiler #
+  @,
+  call: not
+  0;,
+  drop,
+  call: cr
+  okmsg #
+  call: puts
+  return,
+
+label: build#
+  call: tib
+  call: toNumber
+  .data #
+  jump: withClass
+
+label: number
+  call: tib
+  call: isNumber?
+  0 #
+  !if
+    jump: build#
+  then
+  jump: notFound
+
+label: process
+  0 #
+  !if
+    call: xt:class
+    jump: withClass
+  then
+  drop,
+  jump: number
+
+label: listen
+  REPEAT
+    call: ok
+    32 #
+    call: accept
+    call: tib
+    call: find
+    call: process
+  AGAIN
+  return,
+
+label: save-image
+  1 #
+  4 #
+  out,
+  call: wait
+  return,
+
+label: goodbye
+  call: cr
+  -9 # 5 # out,
+  call: wait
+  return,
+
+label: main
+  call: run-on-boot
+  jump: listen
+
+
+main setEntryPoint
+"retroImage" saveImageAs
+.s
+bye
+
+
+
 
 ( Word Prefixes and "Not Found" ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-label: ___   "___" $,
-
-i: get      ( $-$  ) dup, @, ___ # 2 # +, !, 1+, return,
-( NEEDS-DESCRIPTION )
-
-i: xt:class ( d-aa ) dup, d->xt @, swap, d->class @, return,
-( NEEDS-DESCRIPTION )
-
-i: try      (  -   )
-   tib get find 0 #
-   !if d->xt @, ___ # find
-      0 # !if xt:class withClass 0 # return, then drop,
-   then drop, -1 # return,
-( NEEDS-DESCRIPTION )
-
-label: <notFound> <notFound> ( -f ) tib getLength 2 # >if try then return,
-
-label: notFound notFound   ( -  ) <notFound> 0;, drop, cr tib puts 32 # putc '? # putc cr return,
-
-( Listener ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-label: ok ok      (   - ) compiler # @, not 0;, drop, cr okmsg # puts return,
-
-i: build#  (   - ) tib toNumber ' .data # jump: withClass
-( NEEDS-DESCRIPTION )
-
-i: number  (   - ) tib isNumber? 0 # !if jump: build# then jump: notFound
-( NEEDS-DESCRIPTION )
-
-i: process ( af- ) 0 # !if xt:class jump: withClass then drop jump: number
-( NEEDS-DESCRIPTION )
-
-label: listen listen  (   - ) REPEAT ok 32 # accept tib find process AGAIN return,
-
-label: save save    (  -  ) 1 # 4 # out, wait return,
-
-label: bye bye      (  -  ) cr -9 # 5 # out, wait return,
