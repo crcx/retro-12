@@ -53,16 +53,11 @@ label: compiler  0 ,
 label: which     0 ,
 
 label: memory    0 ,
-label: fb        0 ,
-label: fw        0 ,
-label: fh        0 ,
-label: cw        0 ,
-label: ch        0 ,
 
 32 setAddressTo
 
 label: copytag   "Retro" $,
-label: version   "11.6" $,
+label: version   "12.0" $,
 label: build     "2014.04.05" $,
 label: okmsg     "ok  " $,
 
@@ -88,10 +83,6 @@ label: .data
   vector
   compiler # @, 0;, drop, 1 # call: comma call: comma
   return,
-
-label: .primitive  (  a- )
-  vector
-    dup, @, 0 # =if compiler # @, -1 # =if 2 # +, @, then then jump: .word
 
 label: dup
   vector
@@ -343,37 +334,6 @@ label: puts
 label: break
   0 ,
 
-label: remapping
-  -1 ,
-
-label: eatLeading?
-  -1 ,
-
-label: tabAsWhitespace
-  -1 ,
-
-label: keymap
-  0 ,
-
-label: keymap:PREFIX
-  9 ,
-
-label: keymap:TABLE
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-  0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 , 0 ,
-
 label: STRING-LENGTH
   vector
   256 #
@@ -392,19 +352,6 @@ label: tib
   -,
   return,
 
-label: remapKeys
-  vector
-  return,
-
-label: remap:whitespace
-  vector
-   dup,  127 # =if drop,  8 # then
-   dup,   13 # =if drop, 10 # then
-   remapping # @, 0;, drop,
-   dup,   10 # =if drop, 32 # then
-   tabAsWhitespace # @, 0;, drop, dup, 9 # =if drop, 32 # then
-   return,
-
 label: getc:unfiltered
   vector
    1 # 1 # out,
@@ -412,30 +359,13 @@ label: getc:unfiltered
    1 # in,
    return,
 
-label: getc:with/remap
-  vector
-  REPEAT
-    call: getc:unfiltered
-    call: remapKeys
-    dup, 0 # !if call: remap:whitespace return, then
-    drop,
-  AGAIN
-  return,
-
-label: keymap:handler
-  vector
-  return,
-
 label: getc
   vector
   REPEAT
     call: getc:unfiltered
-    call: keymap:handler
-    call: remapKeys
     dup,
     0 #
     !if
-      call: remap:whitespace
       return,
     then
     drop,
@@ -450,7 +380,6 @@ label: putc?
 
 label: eat
   vector
-   eatLeading? # @, 0;, drop,
    REPEAT
      call: getc
      call: putc?
@@ -726,25 +655,11 @@ label: :is
   !,
   return,
 
-label: atib
-  vector 
-  memory # @,
-  call: STRING-LENGTH
-  2 #
-  *,
-  -,
-  return,
-
 label: t-"
   vector 
-  atib #
-  tib #
-  call: :is
   '" #
   call: accept
-  tib #
-  call: :devector
-  call: atib
+  call: tib
   return,
 
 label: #value
@@ -914,11 +829,6 @@ label: query
 label: run-on-boot
   vector 
   -1  # call: query memory # !,  ( Memory Size     )
-  -2  # call: query fb #     !,  ( Canvas Present? )
-  -3  # call: query fw #     !,  ( Canvas Width    )
-  -4  # call: query fh #     !,  ( Canvas Height   )
-  -11 # call: query cw #     !,  ( Console Width   )
-  -12 # call: query ch #     !,  ( Console Height  )
   call: boot
   return,
 
@@ -995,20 +905,6 @@ label: '
   0 #
   return,
 
-label: ___
-  "___" $,
-
-label: get
-  vector 
-  dup,
-  @,
-  ___ #
-  2 #
-  +,
-  !,
-  1+,
-  return,
-
 label: xt:class
   vector 
   dup,
@@ -1019,45 +915,8 @@ label: xt:class
   @,
   return,
 
-label: try
-  vector 
-  call: tib
-  call: get
-  call: find
-  0 #
-  !if
-    call: d->xt
-    @,
-    ___ #
-    call: find
-    0 #
-    !if
-      call: xt:class
-      call: withClass
-      0 #
-      return,
-    then
-    drop,
-  then
-  drop,
-  -1 #
-  return,
-
-label: <notFound>
-  vector 
-  call: tib
-  call: getLength
-  2 #
-  >if
-    call: try
-  then
-  return,
-
 label: notFound
   vector 
-  call: <notFound>
-  0;,
-  drop,
   call: cr
   call: tib
   call: puts
@@ -1134,158 +993,117 @@ label: goodbye
   call: wait
   return,
 
-( _-_-_-_-_-_-_-_-_-_-_-_-_-_ )
-
-
-label: words
-  vector 
-  last #
-  @,
-  REPEAT
-    0;,
-    dup,
-    call: d->name
-    call: puts
-    32 #
-    call: putc
-    @,
-  AGAIN
-  return,
-
 label: main
   vector 
   call: run-on-boot
-  call: words
   jump: listen
 
 
-words .word assignName: words
-
-dup .primitive assignName: dup
-1+ .primitive assignName: 1+
-1- .primitive assignName: 1-
-swap .primitive assignName: swap
-drop .primitive assignName: drop
-and .primitive assignName: and
-or .primitive assignName: or
-xor .primitive assignName: xor
-@ .primitive assignName: @
-! .primitive assignName: !
-+ .primitive assignName: +
-- .primitive assignName: -
-* .primitive assignName: *
-/mod .primitive assignName: /mod
-<< .primitive assignName: <<
->> .primitive assignName: >>
-out .primitive assignName: out
-in .primitive assignName: in
-= .word assignName: =
-<> .word assignName: <>
->= .word assignName: >=
-<= .word assignName: <=
-> .word assignName: >
-< .word assignName: <
-wait .word assignName: wait
-over .word assignName: over
-not .word assignName: not
-on .word assignName: on
-off .word assignName: off
-/ .word assignName: /
-mod .word assignName: mod
-negate .word assignName: negate
-do .word assignName: do
-@+ .word assignName: @+
-!+ .word assignName: !+
-here .word assignName: here
-redraw .word assignName: redraw
-putc .word assignName: putc
-cr .word assignName: cr
-<puts> .word assignName: <puts>
-puts .word assignName: puts
-STRING-LENGTH .word assignName: STRING-LENGTH
+dup            .data assignName: dup
+1+             .data assignName: 1+
+1-             .data assignName: 1-
+swap           .data assignName: swap
+drop           .data assignName: drop
+and            .data assignName: and
+or             .data assignName: or
+xor            .data assignName: xor
+@              .data assignName: @
+!              .data assignName: !
++              .data assignName: +
+-              .data assignName: -
+*              .data assignName: *
+/mod           .data assignName: /mod
+<<             .data assignName: <<
+>>             .data assignName: >>
+out            .data assignName: out
+in             .data assignName: in
+=              .word assignName: =
+<>             .word assignName: <>
+>=             .word assignName: >=
+<=             .word assignName: <=
+>              .word assignName: >
+<              .word assignName: <
+wait           .word assignName: wait
+over           .word assignName: over
+not            .word assignName: not
+on             .word assignName: on
+off            .word assignName: off
+/              .word assignName: /
+mod            .word assignName: mod
+negate         .word assignName: negate
+do             .word assignName: do
+@+             .word assignName: @+
+!+             .word assignName: !+
+here           .word assignName: here
+redraw         .word assignName: redraw
+putc           .word assignName: putc
+cr             .word assignName: cr
+<puts>         .word assignName: <puts>
+puts           .word assignName: puts
+STRING-LENGTH  .word assignName: STRING-LENGTH
 STRING-BUFFERS .word assignName: STRING-BUFFERS
-tib .word assignName: tib
-remapKeys .word assignName: remapKeys
-remap:whitespace .word assignName: remap:whitespace
-getc:unfiltered .word assignName: getc:unfiltered
-getc:with/remap .word assignName: getc:with/remap
-keymap:handler .word assignName: keymap:handler
-getc .word assignName: getc
-accept .word assignName: accept
-d->class .word assignName: d->class
-d->xt .word assignName: d->xt
-d->doc .word assignName: d->doc
-d->name .word assignName: d->name
-
-
-keymap:PREFIX   .data assignName: keymap:PREFIX
-keymap:TABLE    .data assignName: keymap:TABLE
-last            .data assignName: last
-compiler        .data assignName: compiler
-fb              .data assignName: fb
-fw              .data assignName: fw
-fh              .data assignName: fh
-memory          .data assignName: memory
-cw              .data assignName: cw
-ch              .data assignName: ch
-heap            .data assignName: heap
-which           .data assignName: which
-remapping       .data assignName: remapping
-eatLeading?     .data assignName: eatLeading?
-base            .data assignName: base
-update          .data assignName: update
-version         .data assignName: version
-build           .data assignName: build
-is-vector       .data assignName: vector
-tabAsWhitespace .data assignName: tabAsWhitespace
-
-;;         .macro assignName: ;;
-;          .macro assignName: ;
-push       .macro assignName: push
-pop        .macro assignName: pop
-0;         .macro assignName: 0;
-repeat     .macro assignName: repeat
-again      .macro assignName: again
-[[         .macro assignName: [[
-t-(        .macro assignName: (
-[          .macro assignName: [
-]          .macro assignName: ]
-header     .word assignName: header
-create     .word assignName: create
-]]         .word assignName: ]]
-:          .word assignName: :
-quote      .word assignName: quote
-if         .word assignName: if
-ifTrue     .word assignName: ifTrue
-ifFalse    .word assignName: ifFalse
-dip        .word assignName: dip
-sip        .word assignName: sip
-compare    .word assignName: compare
-getLength  .word assignName: getLength
-withLength .word assignName: withLength
-string     .word assignName: string
-keepString .word assignName: keepString
-:devector  .word assignName: :devector
-:is        .word assignName: :is
-atib       .word assignName: atib
-t-"        .word assignName: "
-nums       .word assignName: numbers
-toNumber   .word assignName: toNumber
-isNumber?  .word assignName: isNumber?
-boot       .word assignName: boot
-find       .word assignName: find
-'          .word assignName: '
-notFound   .word assignName: notFound
-ok         .word assignName: ok
-listen     .word assignName: listen
-save-image .word assignName: save
-goodbye    .word assignName: bye
-comma      .word assignName: ,
-withClass  .word assignName: withClass
-.word      .word assignName: .word
-.macro     .word assignName: .macro
-.data      .word assignName: .data
-.primitive .word assignName: .primitive 
+tib            .word assignName: tib
+getc           .word assignName: getc
+accept         .word assignName: accept
+d->class       .word assignName: d->class
+d->xt          .word assignName: d->xt
+d->doc         .word assignName: d->doc
+d->name        .word assignName: d->name
+header         .word assignName: header
+create         .word assignName: create
+]]             .word assignName: ]]
+:              .word assignName: :
+quote          .word assignName: quote
+if             .word assignName: if
+ifTrue         .word assignName: ifTrue
+ifFalse        .word assignName: ifFalse
+dip            .word assignName: dip
+sip            .word assignName: sip
+compare        .word assignName: compare
+getLength      .word assignName: getLength
+withLength     .word assignName: withLength
+string         .word assignName: string
+keepString     .word assignName: keepString
+:devector      .word assignName: :devector
+:is            .word assignName: :is
+t-"            .word assignName: "
+nums           .word assignName: numbers
+toNumber       .word assignName: toNumber
+isNumber?      .word assignName: isNumber?
+boot           .word assignName: boot
+find           .word assignName: find
+'              .word assignName: '
+notFound       .word assignName: notFound
+ok             .word assignName: ok
+listen         .word assignName: listen
+save-image     .word assignName: save
+goodbye        .word assignName: bye
+comma          .word assignName: ,
+withClass      .word assignName: withClass
+.word          .word assignName: .word
+.macro         .word assignName: .macro
+.data          .word assignName: .data
+last           .data assignName: last
+compile        .data assignName: compiler
+memory         .data assignName: memory
+heap           .data assignName: heap
+which          .data assignName: which
+base           .data assignName: base
+update         .data assignName: update
+version        .data assignName: version
+build          .data assignName: build
+is-vector      .data assignName: vector
+;;             .macro assignName: ;;
+;              .macro assignName: ;
+push           .macro assignName: push
+pop            .macro assignName: pop
+0;             .macro assignName: 0;
+repeat         .macro assignName: repeat
+again          .macro assignName: again
+[[             .macro assignName: [[
+t-(            .macro assignName: (
+[              .macro assignName: [
+]              .macro assignName: ]
 
 heapBeginsHere
 
