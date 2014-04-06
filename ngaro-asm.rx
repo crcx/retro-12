@@ -92,7 +92,7 @@ image [ !target ] [ !origin ] bi
 ( Remaining Assembler Functions ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
 : here        (  -n ) @target @origin - ;
-: label:      ( "-  ) here constant ;
+: label:      ( "-  ) here constant @last d->name cr puts ': putc @last d->xt @ putn cr ;
 : #           ( n-  ) lit, , ;
 : $,          ( $-  ) withLength [ @+ , ] times 0 , drop ;
 
@@ -103,7 +103,7 @@ image [ !target ] [ !origin ] bi
 
 : setEntryPoint ( a- )  image 1 + ! ;
 
-: setAddressTo ( a- ) !target ;
+: setAddressTo ( a- ) image + !target ;
 
 : beginApplication
   jump, 0 ,
