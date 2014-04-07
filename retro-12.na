@@ -62,7 +62,7 @@ label: memory    0 ,
 
 label: copytag   "Retro" $,
 label: version   "12.0" $,
-label: build     "2014.04.05" $,
+label: build     "2014.04.07" $,
 label: okmsg     "ok  " $,
 
 label: comma
@@ -75,11 +75,11 @@ label: withClass
   1-, push,
   return,
 
-label: .word
+label: .function
   vector
   compiler # @, 0 # !if call: comma return, then jump: withClass
 
-label: .macro
+label: .immediate
   vector
   jump: withClass
 
@@ -519,7 +519,7 @@ label: vector?
 label: :
   vector
   call: create
-  .word #
+  .function #
   last #
   @,
   call: d->class
@@ -837,8 +837,6 @@ label: boot
   version #
   call: puts
   call: cr
-  call: words
-  call: cr
   return,
 
 label: query
@@ -1041,72 +1039,72 @@ xor            .data assignName: xor
 >>             .data assignName: >>
 out            .data assignName: out
 in             .data assignName: in
-=              .word assignName: =
-<>             .word assignName: <>
->=             .word assignName: >=
-<=             .word assignName: <=
->              .word assignName: >
-<              .word assignName: <
-wait           .word assignName: wait
-over           .word assignName: over
-not            .word assignName: not
-on             .word assignName: on
-off            .word assignName: off
-/              .word assignName: /
-mod            .word assignName: mod
-negate         .word assignName: negate
-do             .word assignName: do
-@+             .word assignName: @+
-!+             .word assignName: !+
-here           .word assignName: here
-redraw         .word assignName: redraw
-putc           .word assignName: putc
-cr             .word assignName: cr
-<puts>         .word assignName: <puts>
-puts           .word assignName: puts
-STRING-LENGTH  .word assignName: STRING-LENGTH
-STRING-BUFFERS .word assignName: STRING-BUFFERS
-tib            .word assignName: tib
-getc           .word assignName: getc
-accept         .word assignName: accept
-d->class       .word assignName: d->class
-d->xt          .word assignName: d->xt
-d->additional  .word assignName: d->additional
-d->name        .word assignName: d->name
-header         .word assignName: header
-create         .word assignName: create
-]]             .word assignName: ]]
-:              .word assignName: :
-quote          .word assignName: quote
-if             .word assignName: if
-ifTrue         .word assignName: ifTrue
-ifFalse        .word assignName: ifFalse
-dip            .word assignName: dip
-sip            .word assignName: sip
-compare        .word assignName: compare
-getLength      .word assignName: getLength
-withLength     .word assignName: withLength
-string         .word assignName: string
-keepString     .word assignName: keepString
-:devector      .word assignName: :devector
-:is            .word assignName: :is
-t-"            .word assignName: "
-nums           .word assignName: numbers
-toNumber       .word assignName: toNumber
-isNumber?      .word assignName: isNumber?
-boot           .word assignName: boot
-find           .word assignName: find
-'              .word assignName: '
-notFound       .word assignName: notFound
-ok             .word assignName: ok
-listen         .word assignName: listen
-save-image     .word assignName: save
-goodbye        .word assignName: bye
-comma          .word assignName: ,
-withClass      .word assignName: withClass
-.word          .word assignName: .word
-.macro         .word assignName: .macro
-.data          .word assignName: .data
+=              .function assignName: =
+<>             .function assignName: <>
+>=             .function assignName: >=
+<=             .function assignName: <=
+>              .function assignName: >
+<              .function assignName: <
+wait           .function assignName: wait
+over           .function assignName: over
+not            .function assignName: not
+on             .function assignName: on
+off            .function assignName: off
+/              .function assignName: /
+mod            .function assignName: mod
+negate         .function assignName: negate
+do             .function assignName: do
+@+             .function assignName: @+
+!+             .function assignName: !+
+here           .function assignName: here
+redraw         .function assignName: redraw
+putc           .function assignName: putc
+cr             .function assignName: cr
+<puts>         .function assignName: <puts>
+puts           .function assignName: puts
+STRING-LENGTH  .function assignName: STRING-LENGTH
+STRING-BUFFERS .function assignName: STRING-BUFFERS
+tib            .function assignName: tib
+getc           .function assignName: getc
+accept         .function assignName: accept
+d->class       .function assignName: d->class
+d->xt          .function assignName: d->xt
+d->additional  .function assignName: d->additional
+d->name        .function assignName: d->name
+header         .function assignName: header
+create         .function assignName: create
+]]             .function assignName: ]]
+:              .function assignName: :
+quote          .function assignName: quote
+if             .function assignName: if
+ifTrue         .function assignName: ifTrue
+ifFalse        .function assignName: ifFalse
+dip            .function assignName: dip
+sip            .function assignName: sip
+compare        .function assignName: compare
+getLength      .function assignName: getLength
+withLength     .function assignName: withLength
+string         .function assignName: string
+keepString     .function assignName: keepString
+:devector      .function assignName: :devector
+:is            .function assignName: :is
+t-"            .function assignName: "
+nums           .function assignName: numbers
+toNumber       .function assignName: toNumber
+isNumber?      .function assignName: isNumber?
+boot           .function assignName: boot
+find           .function assignName: find
+'              .function assignName: '
+notFound       .function assignName: notFound
+ok             .function assignName: ok
+listen         .function assignName: listen
+save-image     .function assignName: save
+goodbye        .function assignName: bye
+comma          .function assignName: ,
+withClass      .function assignName: withClass
+.function          .function assignName: .function
+.immediate         .function assignName: .immediate
+.data          .function assignName: .data
 last           .data assignName: last
 compiler       .data assignName: compiler
 memory         .data assignName: memory
@@ -1117,18 +1115,18 @@ update         .data assignName: update
 version        .data assignName: version
 build          .data assignName: build
 is-vector      .data assignName: vector
-;;             .macro assignName: ;;
-;              .macro assignName: ;
-push           .macro assignName: push
-pop            .macro assignName: pop
-0;             .macro assignName: 0;
-repeat         .macro assignName: repeat
-again          .macro assignName: again
-[[             .macro assignName: [[
-t-(            .macro assignName: (
-[              .macro assignName: [
-]              .macro assignName: ]
-words          .word  assignName: words
+;;             .immediate assignName: ;;
+;              .immediate assignName: ;
+push           .immediate assignName: push
+pop            .immediate assignName: pop
+0;             .immediate assignName: 0;
+repeat         .immediate assignName: repeat
+again          .immediate assignName: again
+[[             .immediate assignName: [[
+t-(            .immediate assignName: (
+[              .immediate assignName: [
+]              .immediate assignName: ]
+words          .function  assignName: words
 
 heapBeginsHere
 
