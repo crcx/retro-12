@@ -1,13 +1,13 @@
 Dictionary headers are a linked list of a simple structure.
 
-Cell #    Contains
-------    --------------------------------------------
-0         Pointer to prior entry (0 if first header)
-1         Pointer to class handler
-2         Pointer to function
-3         Pointer to additional supplementary header
-4         Pointer to function name string
-------    --------------------------------------------
+    Cell #    Contains
+    ------    --------------------------------------------
+    0         Pointer to prior entry (0 if first header)
+    1         Pointer to class handler
+    2         Pointer to function
+    3         Pointer to additional supplementary header
+    4         Pointer to function name string
+    ------    --------------------------------------------
 
 
 The additional supplementary header field is intended to allow
