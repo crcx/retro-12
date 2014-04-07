@@ -35,8 +35,12 @@ devector keymap:handler
 : last-entry
   image 3 + ;
 
-: assignName:
-  here [ last-entry @ , , , 0 , getToken $, ] dip last-entry ! ;
+: <link>        last-entry @ , ;
+: <class>       , ;
+: <xt>          , ;
+: <additional>  0 , ;
+: <name>        here 1+ , getToken $, ;
+: assignName:   here [ <link> <class> <xt> <additional> <name> ] dip last-entry ! ;
 
 : vector
   nop, nop, ;
@@ -436,7 +440,7 @@ label: d->xt
   1+, 1+,
   return,
 
-label: d->doc
+label: d->additional
   vector
   3 # +,
   return,
@@ -458,13 +462,30 @@ label: header
   call: here
   0 #               ( XT               )
   call: comma
-  0 #               ( Pointer to docstr)
+  0 #               ( Pointer to additional )
   call: comma
   pop,
-  call: $           ( Name             )
+  call: here        ( Pointer to name  )
+  1+,
+  call: comma
+  call: $           ( String for name  )
   call: here
   swap, !,
   return,           ( Patch XT to HERE )
+
+label: words
+  last #
+  REPEAT
+    @,
+    0;,
+    dup,
+    call: d->name
+    @,
+    call: puts
+    32 #
+    call: putc
+  AGAIN
+
 
 label: create
   vector
@@ -816,6 +837,8 @@ label: boot
   version #
   call: puts
   call: cr
+  call: words
+  call: cr
   return,
 
 label: query
@@ -857,16 +880,17 @@ label: done
   return,
 
 label: match?
-  vector 
+  vector
   dup,
   call: d->name
+  @,
   name #
   @,
   call: compare
   return,
 
 label: <search>
-  vector 
+  vector
   REPEAT
     call: match?
     0 #
@@ -1047,7 +1071,7 @@ getc           .word assignName: getc
 accept         .word assignName: accept
 d->class       .word assignName: d->class
 d->xt          .word assignName: d->xt
-d->doc         .word assignName: d->doc
+d->additional  .word assignName: d->additional
 d->name        .word assignName: d->name
 header         .word assignName: header
 create         .word assignName: create
@@ -1084,7 +1108,7 @@ withClass      .word assignName: withClass
 .macro         .word assignName: .macro
 .data          .word assignName: .data
 last           .data assignName: last
-compile        .data assignName: compiler
+compiler       .data assignName: compiler
 memory         .data assignName: memory
 heap           .data assignName: heap
 which          .data assignName: which
@@ -1104,6 +1128,7 @@ again          .macro assignName: again
 t-(            .macro assignName: (
 [              .macro assignName: [
 ]              .macro assignName: ]
+words          .word  assignName: words
 
 heapBeginsHere
 
