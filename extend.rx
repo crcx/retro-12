@@ -1,11 +1,3 @@
-( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-( Ok, at this point the new image should be in control so we have a normal,   )
-( though brutally minimal Retro system from here on.                          )
-( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-
-: words last repeat @ 0; dup d->name puts 32 putc again ;
-
-
 ( Stack Words ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : nip   (  xy-y    ) swap drop ;
 : rot   ( xyz-yzx  ) [ swap ] dip swap ;
@@ -19,7 +11,7 @@
 ( Vectored Execution ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : devector  ( "-  ) ' 0; :devector ;
 : is        ( a"- ) ' 0; :is ;
-: default:  ( "-  ) ' 2 + , ; ' .macro last @ d->class !
+: default:  ( "-  ) ' 2 + , ; ' .immediate last @ d->class !
 
 ( Dictionary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
   create a 0 , create b 0 , create c 0 , create xt 0 ,
@@ -35,21 +27,12 @@
   : :hide      ( a-  )
     dup xt->d last @ = [ drop last @ @ last ! ] [ <hide> ] if ;
   : hide       ( "-  ) ' 0; :hide ;
-
-hide a
-hide b
-hide c
-hide xt
-hide skim
-hide getHeaders
-hide <hide>
-
 : reclass      (  a- ) last @ d->class ! ;
 : reclass:     ( a"- ) d' d->class ! ;
 
 ( Classes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: ['] ' .data ; ' .macro reclass
-: immediate    (   - ) ['] .macro reclass ;
+: ['] ' .data ; ' .immediate reclass
+: immediate    (   - ) ['] .immediate reclass ;
 
 ( Compiler Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : `     ( "-  )
@@ -109,10 +92,6 @@ hide <hide>
   : iter  (  nq-  )
     over 1 >= [ swap dup push for i swap dup dip next pop drop drop ] [ drop drop ] if ;
 
-hide for
-hide next
-hide i
-hide tors
 
 ( Memory Blocks ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : copy   ( aan-  ) [ ['] @+ dip !+ ] times drop drop ;
@@ -135,14 +114,12 @@ hide tors
 
 : string:    ( $"-  ) keepString constant ;
 
-: allot      (  n-  ) dup 0 < [ heap +! ] [ [ 0 , ] times ] if ;
+: allot      (  n-  ) heap +! ;
 
   : list     (  n-a ) here swap allot ;
   : element  (  a-a ) create dup last @ d->xt ! 1+ ;
   : elements ( n"-  ) dup list swap ['] element times drop ;
 
-hide list
-hide element
 
 ( Numbers and Math ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : decimal ( - ) 10 base ! ;
@@ -155,7 +132,8 @@ hide element
 
 ( Output ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
   create buf   32 allot
-  2 elements digits pos
+  variable digits
+  variable pos
   : split    (   n-... )
     repeat base @ /mod swap numbers + @ swap digits ++ 0; again ;
   : build    ( ...-    )
@@ -164,12 +142,6 @@ hide element
   : negate?  (   n-n   ) dup 0 >= if; negate 45 pos ! ;
 
   : toString (   n-$   ) 0 [ pos ! ] [ digits ! ] bi negate? split build buf ;
-hide negate?
-hide build
-hide splot
-hide digits
-hide pos
-hide buf
 
 : clear (  - ) -1 putc ;
 
@@ -195,9 +167,6 @@ hide buf
     next @ STRING-LENGTH * buffers + [ swap copy ] sip
     next ++ ;
 
-hide buffers
-hide next
-
 ( Debugging ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : depth   (    -n ) -5 5 out wait 5 in ;
 
@@ -205,7 +174,6 @@ hide next
 
   : (.s)  0; 1- swap push (.s) pop dup putn space ;
   : .s    depth (.s) ;
-hide (.s)
 
 ( Misc. Words ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : getToken ( "-$ ) 32 accept tib tempString ;
@@ -223,8 +191,3 @@ hide (.s)
 : getEnv   ( a$- ) -10 5 out wait ;
 
 : later    (  -  ) pop pop swap push push ;
-
-  : xt,   ( - ) 1 , last @ d->xt @ , ;
-  : yield ( - ) 1 , here 5 + , xt, ` :is 9 , xt,  ` :devector ; immediate
-
-hide xt,
