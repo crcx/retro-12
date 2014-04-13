@@ -368,6 +368,18 @@ label: getc
   REPEAT
     call: getc:unfiltered
     dup,
+    10 #
+    =if
+      drop,
+      32 #
+    then
+    dup,
+    13 #
+    =if
+      drop,
+      32 #
+    then
+    dup,
     0 #
     !if
       return,
@@ -1102,8 +1114,8 @@ save-image     .function assignName: save
 goodbye        .function assignName: bye
 comma          .function assignName: ,
 withClass      .function assignName: withClass
-.function          .function assignName: .function
-.immediate         .function assignName: .immediate
+.function      .function assignName: .function
+.immediate     .function assignName: .immediate
 .data          .function assignName: .data
 last           .data assignName: last
 compiler       .data assignName: compiler
