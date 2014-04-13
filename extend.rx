@@ -1,12 +1,16 @@
-( Stack Words ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: nip   (  xy-y    ) swap drop ;
-: rot   ( xyz-yzx  ) [ swap ] dip swap ;
-: tuck  (  xy-yxy  ) swap over ;
-: +!    (  na-     ) [ @ + ] sip ! ;
-: -!    (  na-     ) [ @ swap - ] sip ! ;
-: ++    (   a-     ) 1 swap +! ;
-: --    (   a-     ) 1 swap -! ;
-: ?dup  (   n-n || n-nn )  dup 0; ;
+: variable:  create , ;
+: variable   0 variable: ;
+: constant   create last @ d->xt ! ;
+: string:    keepString constant ;
+: allot      heap +! ;
+: nip        swap drop ;
+: rot        [ swap ] dip swap ;
+: tuck       swap over ;
+: +!         [ @ + ] sip ! ;
+: -!         [ @ swap - ] sip ! ;
+: ++         1 swap +! ;
+: --         1 swap -! ;
+: ?dup       dup 0; ;
 
 ( Vectored Execution ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : devector  ( "-  ) ' 0; :devector ;
@@ -14,19 +18,10 @@
 : default:  ( "-  ) ' 2 + , ; ' .immediate last @ d->class !
 
 ( Dictionary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-  create a 0 , create b 0 , create c 0 , create xt 0 ,
-  : skim       ( a-a )
-    last repeat @ over over d->xt @ = [ nip 0 ] ifTrue 0; again ;
-  : getHeaders ( $-  )
-    xt ! 0 a ! 0 b ! 0 c !
-    last repeat @ 0; dup d->xt @ xt @ = [ dup b ! @ a ! 0 ] [ -1 ] if 0; drop dup c ! again ;
-  : <hide>     ( a-  ) getHeaders b @ 0; drop a @ c @ ! ;
-
-  : d'         ( "-a ) ' drop which @ ;
-  : xt->d      ( a-d || a-0 ) dup skim over over = [ - ] [ nip ] if ;
-  : :hide      ( a-  )
-    dup xt->d last @ = [ drop last @ @ last ! ] [ <hide> ] if ;
-  : hide       ( "-  ) ' 0; :hide ;
+: skim       ( a-a )
+  last repeat @ over over d->xt @ = [ nip 0 ] ifTrue 0; again ;
+: d'         ' drop which @ ;
+: xt->d      dup skim over over = [ - ] [ nip ] if ;
 : reclass      (  a- ) last @ d->class ! ;
 : reclass:     ( a"- ) d' d->class ! ;
 
@@ -38,7 +33,7 @@
 : `     ( "-  )
   ' ?dup 0 <> -1 =
   [ .data which @ d->class @ , ]
-  [  tib isNumber? -1 =
+  [ tib isNumber? -1 =
     [ tib toNumber .data ['] .data , ] [ notFound ] if ] if ; immediate
 
 : jump: ( "- ) ' 0; 8 , , ; immediate
@@ -54,9 +49,9 @@
 
 : take    (  qq-q   ) swap [ [ ` [ ] dip , ] dip .data ` ] ;
 
-: bi      (  xqq-   ) ['] sip dip do ;
+: bi      (  xqq-   ) [ sip ] dip do ;
 
-: bi*     ( xyqq-   ) ['] dip dip do ;
+: bi*     ( xyqq-   ) [ dip ] dip do ;
 
 : bi@     (  xyq-   ) dup bi* ;
 
@@ -99,22 +94,10 @@
 : fill   ( ann-  ) swap here ! [ here @ swap !+ ] times drop ;
 
 ( Conditionals ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: ahead  (   -a  ) 8 , here 0 , ;
-
-: if;    (  f-   ) ` not ` 0; ` drop ; immediate
-
 : within ( xlu-f ) ['] over dip <= ['] >= dip and ;
 
 ( Data Structures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: variable:  ( n"-  ) create , ;
 
-: variable   (  "-  ) 0 variable: ;
-
-: constant   ( n"-  ) create last @ d->xt ! ;
-
-: string:    ( $"-  ) keepString constant ;
-
-: allot      (  n-  ) heap +! ;
 
   : list     (  n-a ) here swap allot ;
   : element  (  a-a ) create dup last @ d->xt ! 1+ ;
@@ -131,7 +114,8 @@
 : binary  ( - )  2 base ! ;
 
 ( Output ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-  create buf   32 allot
+  create buf
+  32 allot
   variable digits
   variable pos
   : split    (   n-... )
@@ -139,9 +123,8 @@
   : build    ( ...-    )
     buf pos @ [ pos @ swap !+ ] ifTrue
     digits @ [ !+ ] times 0 swap ! ;
-  : negate?  (   n-n   ) dup 0 >= if; negate 45 pos ! ;
-
-  : toString (   n-$   ) 0 [ pos ! ] [ digits ! ] bi negate? split build buf ;
+  : negate?  (   n-n   ) dup 0 >= not 0; drop negate 45 pos ! ;
+  : toString (   n-$   ) 0 pos ! 0 digits ! negate? split build buf ;
 
 : clear (  - ) -1 putc ;
 
@@ -149,9 +132,6 @@
 
 : putn  ( n- ) toString puts ;
 
-: rename: ( a"- )
-  create dup xt->d swap :hide
-  [ d->xt @ last @ d->xt ! ] [ d->class @ last @ d->class ! ] bi ;
 
 ( Core Strings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
   : buffers  ( -a )
