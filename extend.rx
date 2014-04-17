@@ -2,12 +2,12 @@
 : variable   0 variable: ;
 : constant   create last @ d->xt ! ;
 : string:    keepString constant ;
+: +!         [ @ + ] sip ! ;
+: -!         [ @ swap - ] sip ! ;
 : allot      heap +! ;
 : nip        swap drop ;
 : rot        [ swap ] dip swap ;
 : tuck       swap over ;
-: +!         [ @ + ] sip ! ;
-: -!         [ @ swap - ] sip ! ;
 : ++         1 swap +! ;
 : --         1 swap -! ;
 : ?dup       dup 0; ;
@@ -39,8 +39,6 @@
 : jump: ( "- ) ' 0; 8 , , ; immediate
 
 ( Additional Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: []      (    -    ) ` [ ` ] ; immediate
-
 : while   (   q-    ) [ repeat dup dip swap 0; drop again ] do drop ;
 
 : until   (   q-    ) [ repeat dup dip swap not 0; drop again ] do drop ;

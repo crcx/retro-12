@@ -43,7 +43,7 @@ devector keymap:handler
 : assignName:   here [ <link> <class> <xt> <additional> <name> ] dip last-entry ! ;
 
 : vector
-  nop, nop, ;
+  ;;  nop, nop, ;
 
 
 ( and now the retro kernel begins                                             )
@@ -62,22 +62,38 @@ label: memory    0 ,
 
 label: copytag   "Retro" $,
 label: version   "12.0" $,
-label: build     "2014.04.07" $,
+label: build     "2014.04.17" $,
 label: okmsg     "ok  " $,
 
 label: comma
   vector
-  heap # @, dup, 1+, push, !, pop, heap # !,
+  heap #
+  @,
+  dup,
+  1+,
+  push,
+    !,
+  pop,
+  heap #
+  !,
   return,
 
 label: withClass
   vector
-  1-, push,
+  1-,
+  push,
   return,
 
 label: .function
   vector
-  compiler # @, 0 # !if call: comma return, then jump: withClass
+  compiler #
+  @,
+  0 #
+  !if
+    call: comma
+    return,
+  then
+  jump: withClass
 
 label: .immediate
   vector
@@ -85,7 +101,14 @@ label: .immediate
 
 label: .data
   vector
-  compiler # @, 0;, drop, 1 # call: comma call: comma
+  compiler #
+  @,
+  0 #
+  !if
+    1 #
+    call: comma
+    call: comma
+  then
   return,
 
 label: dup
@@ -185,62 +208,84 @@ label: wait
 
 label: over
   vector
-  push, dup, pop, swap,
+  push,
+    dup,
+  pop,
+  swap,
   return,
 
 label: not
   vector
-  -1 # xor,
+  -1 #
+  xor,
   return,
 
 label: on
   vector
-  -1 # swap, !,
+  -1 #
+  swap,
+  !,
   return,
 
 label: off
   vector
-  0 # swap, !,
+  0 #
+  swap,
+  !,
   return,
 
 label: /
   vector
-  /mod, swap, drop,
+  /mod,
+  swap,
+  drop,
   return,
 
 label: mod
   vector
-  /mod, drop,
+  /mod,
+  drop,
   return,
 
 label: negate
   vector
-  -1 # *,
+  -1 #
+  *,
   return,
 
 label: do
   vector
-  1-, push,
+  1-,
+  push,
   return,
 
 label: @+
   vector
-  dup, 1+, swap, @,
+  dup,
+  1+,
+  swap,
+  @,
   return,
 
 label: !+
   vector
-  dup, 1+, push, !, pop,
+  dup,
+  1+,
+  push,
+    !,
+  pop,
   return,
 
 label: here
   vector
-  heap # @,
+  heap #
+  @,
   return,
 
 label: ;;
   vector
-  9 # call: comma
+  9 #
+  call: comma
   return,
 
 label: ;
@@ -454,7 +499,7 @@ label: d->xt
 
 label: d->additional
   vector
-  3 # +,
+  1+, 1+, 1+,
   return,
 
 label: d->name
@@ -462,28 +507,56 @@ label: d->name
   4 # +,
   return,
 
-label: header
-  vector
-  push,
-  call: here        ( Entry Start      )
-  last # @,         ( Link to previous )
+
+label: header:linkToPrior
+  last #
+  @,
   call: comma
-  last # !,         ( Set as newest    )
-  .data #           ( Class = .data    )
+  return,
+
+label: header:class
+  .data #
   call: comma
+  return,
+
+label: header:xt
+  0 #
+  call: comma
+  return,
+
+label: header:additional
+  0 #
+  call: comma
+  return,
+
+label: header:name
   call: here
-  0 #               ( XT               )
-  call: comma
-  0 #               ( Pointer to additional )
-  call: comma
-  pop,
-  call: here        ( Pointer to name  )
   1+,
   call: comma
-  call: $           ( String for name  )
+  call: $
+  return,
+
+label: header
+  vector
+  ( name -- )
   call: here
-  swap, !,
-  return,           ( Patch XT to HERE )
+  push,
+    call: header:linkToPrior
+    call: header:class
+    call: header:xt
+    call: header:additional
+    call: header:name
+  pop,
+  ( make this the newest entry )
+  last #
+  !,
+  ( patch HERE )
+  call: here
+  last #
+  @,
+  call: d->xt
+  !,
+  return,
 
 label: words
   last #
@@ -923,7 +996,7 @@ label: find
   call: done
   return,
 
-label: '
+label: t'
   vector 
   32 #
   call: accept
@@ -1033,24 +1106,24 @@ label: main
   jump: listen
 
 
-dup            .data assignName: dup
-1+             .data assignName: 1+
-1-             .data assignName: 1-
-swap           .data assignName: swap
-drop           .data assignName: drop
-and            .data assignName: and
-or             .data assignName: or
-xor            .data assignName: xor
-@              .data assignName: @
-!              .data assignName: !
-+              .data assignName: +
--              .data assignName: -
-*              .data assignName: *
-/mod           .data assignName: /mod
-<<             .data assignName: <<
->>             .data assignName: >>
-out            .data assignName: out
-in             .data assignName: in
+dup            .function assignName: dup
+1+             .function assignName: 1+
+1-             .function assignName: 1-
+swap           .function assignName: swap
+drop           .function assignName: drop
+and            .function assignName: and
+or             .function assignName: or
+xor            .function assignName: xor
+@              .function assignName: @
+!              .function assignName: !
++              .function assignName: +
+-              .function assignName: -
+*              .function assignName: *
+/mod           .function assignName: /mod
+<<             .function assignName: <<
+>>             .function assignName: >>
+out            .function assignName: out
+in             .function assignName: in
 =              .function assignName: =
 <>             .function assignName: <>
 >=             .function assignName: >=
@@ -1106,7 +1179,7 @@ toNumber       .function assignName: toNumber
 isNumber?      .function assignName: isNumber?
 boot           .function assignName: boot
 find           .function assignName: find
-'              .function assignName: '
+t'             .function assignName: '
 notFound       .function assignName: notFound
 ok             .function assignName: ok
 listen         .function assignName: listen
