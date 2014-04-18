@@ -129,7 +129,7 @@ label: .function
 ( implementing state-aware functions.                                         )
 (                                                                             )
 ( It will always pass control directly to the function indicated by the       )
-( pointer.
+( pointer.                                                                    )
 
 label: .immediate
   vector
