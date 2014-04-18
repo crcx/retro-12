@@ -2,7 +2,7 @@
 -1 variable: tabAsWhitespace             ( Treat TAB as a space?       )
 
 : remapKeys ( c-c ) ;
-: ws        ( c-c )
+: remap:whitespace ( c-c )
    dup  127 = [ drop  8 ] ifTrue
    dup   13 = [ drop 10 ] ifTrue
    remapping @ 0; drop
@@ -11,4 +11,4 @@
 
 
 : getc:unfiltered 1 1 out wait 1 in ;
-[ repeat getc:unfiltered remapKeys dup 0 <> [ ws 0 ] [ -1 ] if 0; drop drop again ] is getc
+[ repeat getc:unfiltered remapKeys dup 0 <> [ remap:whitespace 0 ] [ -1 ] if 0; drop drop again ] is getc

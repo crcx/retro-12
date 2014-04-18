@@ -1,0 +1,15 @@
+variable keymap
+
+9 variable: keymap:PREFIX
+
+create keymap:TABLE
+  256 allot
+
+: getc:with/remap
+  repeat getc:unfiltered remapKeys dup 0 <> [ remap:whitespace 0 ] [ -1 ] if 0; drop drop again ;
+
+: keymap:handler
+  ;
+
+[ repeat getc:unfiltered keymap:handler remapKeys dup 0 <> [ remap:whitespace 0 ] [ -1 ] if 0; drop drop again ] is getc
+
