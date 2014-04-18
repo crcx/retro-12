@@ -1,6 +1,0 @@
-label: (puts)
-  repeat dup, 1 # +, swap, @, 0;, call: putc again ;,
-
-label: puts
-  call: (puts) drop, ;,
-

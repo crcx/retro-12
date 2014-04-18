@@ -1,0 +1,11 @@
+{{
+  : putc?     dup 8 = [ drop break @ ] [ dup putc ] if ;
+---reveal---
+  : remapKeys
+    dup 127 = [ drop  8 ] ifTrue
+    dup 10 = [ drop 32 ] ifTrue
+    dup 13 = [ drop 32 ] ifTrue
+    dup  9 = [ drop 32 ] ifTrue
+    ;
+  [ repeat getc:unfiltered remapKeys dup 0 <> not 0; drop drop again ] is getc
+}} 

@@ -1,0 +1,4 @@
+: devector  ( "-  ) ' 0; :devector ;
+: is        ( a"- ) ' 0; :is ;
+: default:  ( "-  ) ' 2 + , ; ' .immediate last @ d->class !
+

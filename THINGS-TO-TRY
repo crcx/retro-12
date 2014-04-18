@@ -1,0 +1,22 @@
+After building with 'make', try these:
+
+
+For a base Retro system:
+
+  ./retro
+
+
+For a more full featured Retro:
+
+  ./retro --with stdlib.rx
+
+
+For the above, with vector functions:
+
+  ./retro --with vectors.rx --with stdlib.rx
+
+
+For the above, with remapable input (remapKeys, ws, and backspace support):
+
+  ./retro --with remapable-input.rx --with vectors.rx --with stdlib.rx
+

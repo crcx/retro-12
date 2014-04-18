@@ -10,57 +10,45 @@
 : tuck       swap over ;
 : ++         1 swap +! ;
 : --         1 swap -! ;
-: ?dup       dup 0; ;
-
-( Vectored Execution ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: devector  ( "-  ) ' 0; :devector ;
-: is        ( a"- ) ' 0; :is ;
-: default:  ( "-  ) ' 2 + , ; ' .immediate last @ d->class !
-
-( Dictionary ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: skim       ( a-a )
-  last repeat @ over over d->xt @ = [ nip 0 ] ifTrue 0; again ;
 : d'         ' drop which @ ;
-: xt->d      dup skim over over = [ - ] [ nip ] if ;
+: xt->d
+  dup
+  [ last repeat @ over over d->xt @ = [ nip 0 ] ifTrue 0; again ] do
+  over over = [ - ] [ nip ] if ;
 : reclass      (  a- ) last @ d->class ! ;
-: reclass:     ( a"- ) d' d->class ! ;
-
-( Classes ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : ['] ' .data ; ' .immediate reclass
 : immediate    (   - ) ['] .immediate reclass ;
-
-( Compiler Macros ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : `     ( "-  )
-  ' ?dup 0 <> -1 =
+  ' dup 0; 0 <> -1 =
   [ .data which @ d->class @ , ]
   [ tib isNumber? -1 =
     [ tib toNumber .data ['] .data , ] [ notFound ] if ] if ; immediate
 
-: jump: ( "- ) ' 0; 8 , , ; immediate
+
+create list
+  0 , 0 ,
+
+: {{
+  last @ dup list !+ ! ;
+: ---reveal---
+  last @ list 1+ ! ;
+: }}
+  list @+ swap @ =
+  [ list @ last ! ]
+  [ list @ [ last repeat @ dup @ list 1+ @ <> 0; drop again ] do ! ] if ;
 
 ( Additional Combinators ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : while   (   q-    ) [ repeat dup dip swap 0; drop again ] do drop ;
-
 : until   (   q-    ) [ repeat dup dip swap not 0; drop again ] do drop ;
-
 : curry   (  nq-q   ) [ [ ` [ ] dip .data ] dip , ` ] ;
-
 : take    (  qq-q   ) swap [ [ ` [ ] dip , ] dip .data ` ] ;
-
 : bi      (  xqq-   ) [ sip ] dip do ;
-
 : bi*     ( xyqq-   ) [ dip ] dip do ;
-
 : bi@     (  xyq-   ) dup bi* ;
-
 : tri     ( xqqq-   ) [ ['] sip dip sip ] dip do ;
-
 : tri*    ( xyzqqq- ) [ [ swap ['] dip dip ] dip dip ] dip do ;
-
 : tri@    ( xyzq-   ) dup dup tri* ;
-
 : cons    (  ab-q   ) push push ` [ pop pop ['] .data bi@ ` ] ;
-
 : preserve ( aq-    ) swap ['] @ sip [ ['] do dip ] dip ! ;
 
 : when    (  nqq-n  )
@@ -71,47 +59,20 @@
   [ over swap do ] dip swap
   [ nip do -1 ] [ drop 0 ] if 0; pop drop drop ;
 
-  : for   ( R: n-  C: -a ) here ` push ; immediate
-  : next  ( R: -   C: a- ) ` pop 7 , , ; immediate
-  : i pop pop pop over over push push swap - swap push ;
-  : tors  (    -n ) ` pop ` dup ` push ; immediate
-
-  : times (  nq-  )
-    over 1 >= [ swap for dup dip next drop ] [ drop drop ] if ;
-
-  : iterd (  nq-  )
-    over 1 >= [ swap for tors swap dup dip next drop ] [ drop drop ] if ;
-
-  : iter  (  nq-  )
-    over 1 >= [ swap dup push for i swap dup dip next pop drop drop ] [ drop drop ] if ;
+: times (  nq-  )
+  over 1 >= [ swap [[ here ]] [ dup dip ] dip [[ 7 , , ]] drop ] [ drop drop ] if ;
 
 
-( Memory Blocks ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : copy   ( aan-  ) [ ['] @+ dip !+ ] times drop drop ;
-
 : fill   ( ann-  ) swap here ! [ here @ swap !+ ] times drop ;
 
-( Conditionals ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : within ( xlu-f ) ['] over dip <= ['] >= dip and ;
 
-( Data Structures ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-
-
-  : list     (  n-a ) here swap allot ;
-  : element  (  a-a ) create dup last @ d->xt ! 1+ ;
-  : elements ( n"-  ) dup list swap ['] element times drop ;
-
-
-( Numbers and Math ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : decimal ( - ) 10 base ! ;
-
 : hex     ( - ) 16 base ! ;
-
 : octal   ( - )  8 base ! ;
-
 : binary  ( - )  2 base ! ;
 
-( Output ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
   create buf
   32 allot
   variable digits
@@ -147,25 +108,12 @@
 
 ( Debugging ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : depth   (    -n ) -5 5 out wait 5 in ;
-
 : reset   ( ...-  ) depth repeat 0; 1- nip again ;
-
-  : (.s)  0; 1- swap push (.s) pop dup putn space ;
-  : .s    depth (.s) ;
+: (.s)  0; 1- swap push (.s) pop dup putn space ;
+: .s    depth (.s) ;
 
 ( Misc. Words ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : getToken ( "-$ ) 32 accept tib tempString ;
-
 : getNumber ( "-n )  getToken toNumber ;
-
 : :include ( $-  ) 2 4 out wait ;
-
 : include  ( "-  ) getToken :include ;
-
-: time     (  -n ) -8 5 out wait 5 in ;
-
-: delay    ( n-  ) time + [ dup time > ] while drop ;
-
-: getEnv   ( a$- ) -10 5 out wait ;
-
-: later    (  -  ) pop pop swap push push ;
