@@ -1,4 +1,6 @@
 : negate     -1 * ;
+: getLength dup [ repeat @+ 0; drop again ] do 1- swap - ;
+: withLength dup getLength ;
 : variable:  create , ;
 : variable   0 variable: ;
 : constant   create last @ d->xt ! ;

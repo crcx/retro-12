@@ -903,21 +903,6 @@ label: count
   AGAIN
   return,
 
-label: getLength
-  vector 
-  dup,
-  call: count
-  1-,
-  swap,
-  -,
-  return,
-
-label: withLength
-  vector 
-  dup,
-  call: getLength
-  return,
-
 label: string
   vector 
   pop,
@@ -1358,8 +1343,6 @@ ifFalse        .function assignName: ifFalse
 dip            .function assignName: dip
 sip            .function assignName: sip
 compare        .function assignName: compare
-getLength      .function assignName: getLength
-withLength     .function assignName: withLength
 string         .function assignName: string
 keepString     .function assignName: keepString
 :devector      .function assignName: :devector
