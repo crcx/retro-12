@@ -11,3 +11,32 @@ create prefix
   tib @ prefix:set prefix:seek ;
 
 ' <notFound> is notFound
+
+
+
+
+{{
+  : s>d find drop ;
+  : xt:class ( d-aa ) dup d->xt @ swap d->class @ withClass ;
+---reveal---
+  : __&  ( a-a ) s>d d->xt @ .data          ; immediate
+  : __@  ( a-n ) s>d xt:class &@ xt->d xt:class  ; immediate
+  : __!  ( na- ) s>d xt:class &! xt->d xt:class  ; immediate
+  : __+  ( na- ) s>d xt:class &+! xt->d .function ; immediate
+  : __-  ( na- ) s>d xt:class &-! xt->d .function ; immediate
+  : __2  ( a-  ) s>d &xt:class sip xt:class ; immediate
+}}
+
+: .parse  (  a- ) do ;
+: parsing (   - ) &.parse reclass ;
+
+{{
+  : number ( a- ) base @ [ do toNumber .data ] dip base ! ;
+---reveal---
+  : __$   ( $-n ) &hex     number ; parsing
+  : __#   ( $-n ) &decimal number ; parsing
+  : __%   ( $-n ) &binary  number ; parsing
+  : __'   ( $-n ) @ .data         ; parsing
+}}
+
+
