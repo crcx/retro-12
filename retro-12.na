@@ -55,15 +55,21 @@ label: last      0 ,
 label: heap      0 ,
 label: compiler  0 ,
 label: which     0 ,
-
 label: memory    0 ,
 
 32 setAddressTo
 
 label: copytag   "Retro" $,
 label: version   "12.0" $,
-label: build     "2014.04.17" $,
+label: build     "2014.04.18" $,
 label: okmsg     "ok  " $,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function: ,                                                                 )
+( Takes: value                                                                )
+( Returns:                                                                    )
+( Stores a value into the heap and advances the heap pointer by 1. This forms )
+( the root of the compiler.                                                   )
 
 label: comma
   vector
@@ -78,11 +84,29 @@ label: comma
   !,
   return,
 
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function: withClass                                                         )
+( Takes: xt class                                                             )
+( Returns:                                                                    )
+( This will pass control to the specified class handler. It's basically the   )
+( same as the do function, but exists to provide a hook point for debugging   )
+( purposes.                                                                   )
+
 label: withClass
   vector
   1-,
   push,
   return,
+
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function: .function                                                         )
+( Takes: pointer                                                              )
+( Returns:                                                                    )
+( This is the class handler for all normal functions. If the compiler is on,  )
+( it will lay down a call to the pointer. If the compiler is off, it will     )
+( pass control to the function the pointer points to.                         )
 
 label: .function
   vector
@@ -95,9 +119,27 @@ label: .function
   then
   jump: withClass
 
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function: .immediate                                                        )
+( Takes: pointer                                                              )
+( Returns:                                                                    )
+( This is the class handler for functions that are intended to always be run  )
+( directly. It's mostly used for compiler macros, but can also be used for    )
+( implementing state-aware functions.                                         )
+(                                                                             )
+( It will always pass control directly to the function indicated by the       )
+( pointer.
+
 label: .immediate
   vector
   jump: withClass
+
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: .data
   vector
@@ -111,100 +153,209 @@ label: .data
   then
   return,
 
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: dup
   vector
   dup,
   return,
+
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: 1+
   vector
   1+,
   return,
 
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: 1-
   vector
   1-,
   return,
+
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: swap
   vector
   swap,
   return,
 
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: drop
   vector
   drop,
   return,
+
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: and
   vector
   and,
   return,
 
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: or
   vector
   or,
   return,
+
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: xor
   vector
   xor,
   return,
 
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: @
   vector
   @,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: !
   vector
   !,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: +
   vector
   +,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: -
   vector
   -,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: *
   vector
   *,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: /mod
   vector
   /mod,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: <<
   vector
   <<,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: >>
   vector
   >>,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: out
   vector
   out,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: in
   vector
   in,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: wait
   vector
   0 # 0 # out, wait,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: over
   vector
@@ -214,11 +365,21 @@ label: over
   swap,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: not
   vector
   -1 #
   xor,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: on
   vector
@@ -227,12 +388,23 @@ label: on
   !,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
+
 label: off
   vector
   0 #
   swap,
   !,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: /
   vector
@@ -241,11 +413,21 @@ label: /
   drop,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: mod
   vector
   /mod,
   drop,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: negate
   vector
@@ -253,11 +435,21 @@ label: negate
   *,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
+
 label: do
   vector
   1-,
   push,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: @+
   vector
@@ -266,6 +458,11 @@ label: @+
   swap,
   @,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: !+
   vector
@@ -276,11 +473,22 @@ label: !+
   pop,
   return,
 
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function: here                                                              )
+( Takes:                                                                      )
+( Returns: pointer                                                            )
+( This returns a pointer to the current location in the heap                  )
+
 label: here
   vector
   heap #
   @,
   return,
+
+( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+( Function:                                                                   )
+( Takes:                                                                      )
+( Returns:                                                                    )
 
 label: ;;
   vector
