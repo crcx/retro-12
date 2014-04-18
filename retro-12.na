@@ -598,17 +598,12 @@ label: tib
   -,
   return,
 
-label: getc:unfiltered
-  vector
-   1 # 1 # out,
-   call: wait
-   1 # in,
-   return,
-
 label: getc
   vector
   REPEAT
-    call: getc:unfiltered
+     1 # 1 # out,
+     call: wait
+     1 # in,
     dup,
     10 #
     =if
