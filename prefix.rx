@@ -1,0 +1,13 @@
+create prefix
+  95 , 95 , 95 , 0 ,
+
+: prefix:set
+  prefix 2 + ! ;
+
+: prefix:seek
+  prefix find 0 <> [ tib 1 + swap dup d->xt @ swap d->class @ withClass ] [ drop default: notFound ] if ;
+
+: <notFound>
+  tib @ prefix:set prefix:seek ;
+
+' <notFound> is notFound
