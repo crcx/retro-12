@@ -1,11 +1,14 @@
-{{
-  : putc?     dup 8 = [ drop break @ ] [ dup putc ] if ;
----reveal---
-  : remapKeys
-    dup 127 = [ drop  8 ] ifTrue
-    dup 10 = [ drop 32 ] ifTrue
-    dup 13 = [ drop 32 ] ifTrue
-    dup  9 = [ drop 32 ] ifTrue
-    ;
-  [ repeat getc:unfiltered remapKeys dup 0 <> not 0; drop drop again ] is getc
-}} 
+-1 variable: remapping                   ( Allow extended whitespace?  )
+-1 variable: tabAsWhitespace             ( Treat TAB as a space?       )
+
+: remapKeys ( c-c ) ;
+: ws        ( c-c )
+   dup  127 = [ drop  8 ] ifTrue
+   dup   13 = [ drop 10 ] ifTrue
+   remapping @ 0; drop
+   dup   10 = [ drop 32 ] ifTrue
+   tabAsWhitespace @ 0; drop dup 9 = [ drop 32 ] ifTrue ;
+
+
+: getc:unfiltered 1 1 out wait 1 in ;
+[ repeat getc:unfiltered remapKeys dup 0 <> [ ws 0 ] [ -1 ] if 0; drop drop again ] is getc
