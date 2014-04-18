@@ -43,7 +43,7 @@ devector keymap:handler
 : assignName:   here [ <link> <class> <xt> <additional> <name> ] dip last-entry ! ;
 
 : vector
-  ;;  nop, nop, ;
+  nop, nop, ;
 
 
 ( and now the retro kernel begins                                             )
