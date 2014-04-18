@@ -429,17 +429,6 @@ label: mod
 ( Takes:                                                                      )
 ( Returns:                                                                    )
 
-label: negate
-  vector
-  -1 #
-  *,
-  return,
-
-( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-( Function:                                                                   )
-( Takes:                                                                      )
-( Returns:                                                                    )
-
 label: do
   vector
   1-,
@@ -1345,7 +1334,6 @@ on             .function assignName: on
 off            .function assignName: off
 /              .function assignName: /
 mod            .function assignName: mod
-negate         .function assignName: negate
 do             .function assignName: do
 @+             .function assignName: @+
 !+             .function assignName: !+

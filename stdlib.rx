@@ -1,3 +1,4 @@
+: negate     -1 * ;
 : variable:  create , ;
 : variable   0 variable: ;
 : constant   create last @ d->xt ! ;
