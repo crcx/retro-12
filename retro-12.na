@@ -590,6 +590,25 @@ label: STRING-BUFFERS
   12 #
   return,
 
+label: (copy)
+  REPEAT
+    push,
+      push,
+        call: @+
+      pop,
+      call: !+
+    pop,
+    1-,
+    0;,
+  AGAIN
+
+label: copy
+  vector
+  call: (copy)
+  drop,
+  drop,
+  return,
+
 label: tib
   vector
   memory #
@@ -1325,6 +1344,7 @@ cr             .function assignName: cr
 puts           .function assignName: puts
 STRING-LENGTH  .function assignName: STRING-LENGTH
 STRING-BUFFERS .function assignName: STRING-BUFFERS
+copy           .function assignName: copy
 tib            .function assignName: tib
 getc           .function assignName: getc
 accept         .function assignName: accept

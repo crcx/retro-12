@@ -65,8 +65,6 @@ create list
 : times (  nq-  )
   over 1 >= [ swap [[ here ]] [ dup dip ] dip [[ 7 , , ]] drop ] [ drop drop ] if ;
 
-
-: copy   ( aan-  ) [ ['] @+ dip !+ ] times drop drop ;
 : fill   ( ann-  ) swap here ! [ here @ swap !+ ] times drop ;
 
 : within ( xlu-f ) ['] over dip <= ['] >= dip and ;
