@@ -872,14 +872,6 @@ label: if
   vector
   push, swap, pop, swap, 0 # !if drop, call: do return, then swap, drop, call: do return,
 
-label: ifTrue
-  vector
-  empty # call: if return,
-
-label: ifFalse
-  vector
-  empty # swap, call: if return,
-
 label: dip
   vector
   swap, push, call: do pop, return,
@@ -1358,8 +1350,6 @@ create         .function assignName: create
 :              .function assignName: :
 quote          .function assignName: quote
 if             .function assignName: if
-ifTrue         .function assignName: ifTrue
-ifFalse        .function assignName: ifFalse
 dip            .function assignName: dip
 sip            .function assignName: sip
 compare        .function assignName: compare

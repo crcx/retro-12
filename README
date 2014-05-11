@@ -11,3 +11,20 @@ This is the start of what will eventually become Retro 12. The
 current stable release is Retro 11. Things here are subject to
 change drastically at this point and should not be used for any
 serious applications at this time.
+
+
+NOTES:
+
+- This is *not* compatible with 11.x code yet
+- Many functions are being renamed / removed / revised
+- A compatibility library will be provided to smooth over most of this
+
+In implementing this, I am backporting functionality from Parable,
+adding new bits, and generally trying to make a smaller kernel with a
+richer standard library. It'll ultimately be a leaner core language,
+with lots of modules to expand it into a more capable system (allowing
+better usability on embedded targets).
+
+To facilitate code sharing between Parable and Retro, some functions
+and naming conventions will be modified. (e.g., use of dashes in multi
+word names, and consistent behavior between combinators that both share).

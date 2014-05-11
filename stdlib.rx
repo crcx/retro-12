@@ -1,3 +1,10 @@
+: true     -1 ;
+: false     0 ;
+: true?     true  = ;
+: false?    false = ;
+: if-true   [ ] if ;
+: if-false  [ ] swap if ;
+
 : negate     -1 * ;
 : getLength dup [ repeat @+ 0; drop again ] do 1- swap - ;
 : withLength dup getLength ;
@@ -16,15 +23,15 @@
 : d'         ' drop which @ ;
 : xt->d
   dup
-  [ last repeat @ over over d->xt @ = [ nip 0 ] ifTrue 0; again ] do
+  [ last repeat @ over over d->xt @ = [ nip 0 ] if-true 0; again ] do
   over over = [ - ] [ nip ] if ;
 : reclass      (  a- ) last @ d->class ! ;
 : ['] ' .data ; ' .immediate reclass
 : immediate    (   - ) ['] .immediate reclass ;
 : `     ( "-  )
-  ' dup 0; 0 <> -1 =
+  ' dup 0; 0 <> true?
   [ .data which @ d->class @ , ]
-  [ tib isNumber? -1 =
+  [ tib isNumber? true?
     [ tib toNumber .data ['] .data , ] [ notFound ] if ] if ; immediate
 
 
@@ -48,32 +55,33 @@ create list
 : bi      (  xqq-   ) [ sip ] dip do ;
 : bi*     ( xyqq-   ) [ dip ] dip do ;
 : bi@     (  xyq-   ) dup bi* ;
-: tri     ( xqqq-   ) [ ['] sip dip sip ] dip do ;
-: tri*    ( xyzqqq- ) [ [ swap ['] dip dip ] dip dip ] dip do ;
+: tri     ( xqqq-   ) [ [ sip ] dip sip ] dip do ;
+: tri*    ( xyzqqq- ) [ [ swap [ dip ] dip ] dip dip ] dip do ;
 : tri@    ( xyzq-   ) dup dup tri* ;
-: cons    (  ab-q   ) push push ` [ pop pop ['] .data bi@ ` ] ;
-: preserve ( aq-    ) swap ['] @ sip [ ['] do dip ] dip ! ;
+: cons    (  ab-q   ) push push ` [ pop pop [ .data ] bi@ ` ] ;
+: preserve ( aq-    ) swap [ @ ] sip [ [ do ] dip ] dip ! ;
 
 : when    (  nqq-n  )
   [ over swap do ] dip swap
-  [ do -1 ] [ drop 0 ] if 0; pop drop drop ;
+  [ do true ] [ drop false ] if 0; pop drop drop ;
 
 : whend   ( nqq-? )
   [ over swap do ] dip swap
-  [ nip do -1 ] [ drop 0 ] if 0; pop drop drop ;
+  [ nip do true ] [ drop false ] if 0; pop drop drop ;
 
 : times (  nq-  )
   over 1 >= [ swap [[ here ]] [ dup dip ] dip [[ 7 , , ]] drop ] [ drop drop ] if ;
 
 : fill   ( ann-  ) swap here ! [ here @ swap !+ ] times drop ;
 
-: within ( xlu-f ) ['] over dip <= ['] >= dip and ;
+: within ( xlu-f ) [ over ] dip <= [ >= ] dip and ;
 
 : decimal ( - ) 10 base ! ;
 : hex     ( - ) 16 base ! ;
 : octal   ( - )  8 base ! ;
 : binary  ( - )  2 base ! ;
 
+{{
   create buf
   32 allot
   variable digits
@@ -81,10 +89,12 @@ create list
   : split    (   n-... )
     repeat base @ /mod swap numbers + @ swap digits ++ 0; again ;
   : build    ( ...-    )
-    buf pos @ [ pos @ swap !+ ] ifTrue
+    buf pos @ [ pos @ swap !+ ] if-true
     digits @ [ !+ ] times 0 swap ! ;
   : negate?  (   n-n   ) dup 0 >= not 0; drop negate 45 pos ! ;
+---reveal---
   : toString (   n-$   ) 0 pos ! 0 digits ! negate? split build buf ;
+}}
 
 : clear (  - ) -1 putc ;
 
@@ -94,24 +104,29 @@ create list
 
 
 ( Core Strings ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
+{{
+  variable next
+
   : buffers  ( -a )
     memory @       STRING-LENGTH   -  ( tib     )
                    STRING-LENGTH   -  ( scratch )
     STRING-BUFFERS STRING-LENGTH * -  ( buffers ) ;
-
-  variable next
-
+---reveal---
   : tempString ( $-$ )
     withLength 1+
-    next @ STRING-BUFFERS = [ 0 next ! ] ifTrue
+    next @ STRING-BUFFERS = [ 0 next ! ] if-true
     next @ STRING-LENGTH * buffers + [ swap copy ] sip
     next ++ ;
+}}
 
 ( Debugging ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
-: depth   (    -n ) -5 5 out wait 5 in ;
-: reset   ( ...-  ) depth repeat 0; 1- nip again ;
-: (.s)  0; 1- swap push (.s) pop dup putn space ;
-: .s    depth (.s) ;
+{{
+  : (.s)  0; 1- swap push (.s) pop dup putn space ;
+---reveal---
+  : depth   (    -n ) -5 5 out wait 5 in ;
+  : reset   ( ...-  ) depth repeat 0; 1- nip again ;
+  : .s      depth (.s) ;
+}}
 
 ( Misc. Words ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 : getToken ( "-$ ) 32 accept tib tempString ;
