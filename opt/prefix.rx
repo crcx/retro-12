@@ -39,4 +39,20 @@ create prefix
   : __'   ( $-n ) @ .data         ; parsing
 }}
 
+{{
+  variable end
+  : pad     (  -a ) STRING-LENGTH 2 * here + ;
+  : keep    (  -  ) @compiler &keepString &tempString if .data ;
+  : >pad    ( $-$ ) pad over getLength 1+ copy pad keep ;
+  : chop    ( $-$ ) end -- 0 @end ! ;
+  : >$      ( n-  ) dup 8 = [ chop drop ] [ @end !+ !end ] if ;
+  : end?    ( $-$ ) @end @1- '" = [ chop >pad -1 ] [ 0 ] if ;
+  : withPad ( q-  ) 32 pad 1- ! &pad &tib :is do &tib :devector ;
+  : get     (  -c ) getc dup putc ;
+---reveal---
+  : __"  ( "-a )
+    dup withLength + !end
+    end? [ 32 >$ [ end? [ 0 ] [ get >$ -1 ] if ] while ] if-false ; parsing
+  : "    ( "-$ ) [ '" accept pad 1- keep ] withPad ; immediate
+}}
 
