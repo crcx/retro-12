@@ -1,0 +1,14 @@
+{{
+  : each   (  qa- ) [ [ swap dup &do dip ] sip 1+ ] times 2drop ;
+  : array  (  aq- ) swap @+ dup 1 > [ each ] [ 2drop ] if ;
+  : buffer ( anq- ) 2rot each ;
+  : list   (  lq- ) [ &@ dip 2over [ &do dip ] dip over @ ] while 2drop ;
+---reveal---
+  : <each@> ( ...t- ) drop ;
+  : each@   ( ...t- )
+    [ 0  ( ARRAY  ) = ] &array                     whend
+    [ 1  ( BUFFER ) = ] &buffer                    whend
+    [ 2  ( STRING ) = ] [ &withLength dip buffer ] whend
+    [ 3  ( LIST   ) = ] &list                      whend
+    <each@> ;
+}}
