@@ -1,0 +1,14 @@
+{{
+  variable buffer
+  variable ptr
+  : terminate (  -  ) 0 @ptr ! ;
+---reveal---
+  : buffer-start     (  -a ) @buffer  ;
+  : buffer-end       (  -a ) @ptr     ;
+  : buffer-add       ( c-  ) buffer-end ! ptr ++ terminate ;
+  : buffer-get       (  -c ) ptr -- buffer-end @ terminate ;
+  : buffer-empty     (  -  ) buffer-start !ptr   terminate ;
+  : buffer-size      (  -n ) buffer-end buffer-start -   ;
+  : buffer-set       ( a-  ) !buffer buffer-empty ;
+  : buffer-preserve  ( q- )  @ptr [ @buffer [ do ] dip !buffer ] dip !ptr ;
+}}
