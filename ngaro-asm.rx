@@ -151,3 +151,6 @@ image [ !target ] [ !origin ] bi
   : !if  ( -a ) =jump, cond ;
   : then ( a- ) here swap ! ;
 }}
+
+: dump
+  image here [ @+ cr '# putc putn space "slice-store" puts ] times cr ;
