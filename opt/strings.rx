@@ -1,0 +1,68 @@
+{{
+  variable len
+  variable needle
+  variable haystack
+  variable flag
+  variable right
+  variable left
+  variable src
+
+  : buffer  ( -a )
+    @memory        STRING-LENGTH   -  ( tib     )
+                   STRING-LENGTH   -  ( scratch ) ;
+  : trim   ( $-$ )
+    dup withLength + 1- dup @ 32 = [ 0 swap ! dup 1- -- trim ] &drop if ;
+  : place  ( $$n- ) [ copy 0 ] sip here + ! ;
+  : prep   (  $$- ) swap !haystack [ getLength !len ] [ !needle ] bi 0 !flag ;
+  : move   (    - ) @haystack here @len place haystack ++ ;
+  : cmp    (    - )
+    @flag 0 <> not 0; drop @needle here compare [ @haystack 1- !flag ] if-true ;
+---reveal---
+  : string-search   ( $$-f )
+    flag off prep @haystack getLength [ move cmp ] times @flag ;
+
+  : string-find-char ( $c-a )
+    !needle
+    repeat @+
+      dup 0   = [ 2drop 0 0 ] [ -1 ] if 0; drop
+      @needle = [ 1-      0 ] [ -1 ] if 0; drop
+    again ;
+
+  : string-chop      ( $-$ ) tempString withLength over + 1- 0 swap ! ;
+
+  : string-get-subset ( $nn-$ )
+    buffer 0 STRING-LENGTH fill
+    !right !left !src
+    @src @left + @right buffer swap copy buffer tempString ;
+
+  : string-trim-left  ( $-$ ) [ @+ [ 32 = ] [ 0 <> ] bi and ] while 1- ;
+
+  : string-trim-right ( $-$ )
+    buffer [ 0 STRING-LENGTH fill ] [ over getLength copy ] [ trim ] tri tempString ;
+
+  : string-prepend ( $$-$ )
+    buffer 0 STRING-LENGTH fill
+    withLength buffer swap &copy sip
+    &withLength dip buffer + swap copy buffer tempString ;
+
+  : string-append ( $$-$ ) swap string-prepend ;
+
+  : string-append-char ( $c-$ ) swap tempString [ withLength + !+ 0 swap ! ] sip ;
+
+  : string-to-lowercase  ( $-$ )
+    tempString [ [ dup @ dup 'A 'Z within [ 32 + ] if-true swap ! ] 2 each@ ] sip ;
+
+  : string-to-uppercase  ( $-$ )
+    tempString [ [ dup @ dup 'a 'z within [ 32 - ] if-true swap ! ] 2 each@ ] sip ;
+}}
+  : string-reverse ( $-$ )
+    dup tempString buffer-set
+    &getLength [ withLength + 1- ] bi swap
+    [ dup @ buffer-add 1- ] times drop
+    buffer-start tempString ;
+
+  : string-split ( $n-$$ )
+    2over 0 swap string-get-subset &+ dip ;
+
+  : string-split-at-char ( $c-$$ )
+    2over over swap string-find-char over - 1+ 0 swap string-get-subset [ string-find-char 1+ ] dip ;

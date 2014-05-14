@@ -10,7 +10,7 @@ kernel:
 	./retro --with kernel.na --image oldRetroImage
 
 stage2:
-	cat stdlib.rx opt/vectors.rx opt/prefix.rx opt/buffer.rx opt/each.rx > stage2.rx
+	cat stdlib.rx opt/vectors.rx opt/prefix.rx opt/buffer.rx opt/each.rx opt/strings.rx > stage2.rx
 	echo save bye >> stage2.rx
 
 clean:
