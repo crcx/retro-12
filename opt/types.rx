@@ -1,0 +1,5 @@
+0 constant ARRAY  ( -n )
+1 constant BUFFER ( -n )
+2 constant STRING ( -n )
+
+
