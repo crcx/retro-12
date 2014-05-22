@@ -1,0 +1,30 @@
+{{
+  : closer ( sg-sgn ) 2over / over - 2 / ;
+  : loop   ( sg-sr  ) repeat closer 0; + again ;
+---reveal---
+  : squareRoot ( s-r ) 1 loop nip ;
+}}
+
+: gcd ( ab-n ) [ tuck mod dup ] while drop ;
+: lcm ( ab-n ) 2over gcd &* dip / ;
+: divisor? ( ab-f ) mod 0 = ;
+: */  ( abc-d )  &* dip / ;
+: even?  ( n-f )  2 mod 0 =  ;
+: odd?   ( n-f )  2 mod 0 <> ;
+
+: pow  ( bp-n ) 1 swap [ over * ] times nip ;
+: abs  (  n-n ) dup 0 < &negate if-true ;
+: min  ( ab-c ) 2over < &drop &nip  if ;
+: max  ( ab-c ) 2over < &nip  &drop if ;
+
+  variable w
+  variable z
+  : seeds?   ( -  ) @w @z and ;
+  : seed     ( n-  )  [ 62903 and !w ] [ 78578 and !z ] bi ;
+  : ?seed    ( -  ) repeat seeds? 0 <> if; seed again ;
+  : (random) ( -x )
+    36969 z @ 65535 and * @z 16 >> + !z
+    18000 w @ 65535 and * @w 16 >> + !w
+    @z 16 << @w + ;
+  : random     (  -x ) ?seed (random) abs ;
+

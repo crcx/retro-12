@@ -1,0 +1,12 @@
+{{
+  : for   ( R: n-  C: -a ) here ` push ; immediate
+  : next  ( R: -   C: a- ) ` pop 7 , , ; immediate
+  : i 2pop pop 2over 2push swap - swap push ;
+  : tors  (    -n ) ` pop ` dup ` push ; immediate
+---reveal---
+  : iterd (  nq-  )
+    over 1 >= [ swap for tors swap dup dip next drop ] [ 2drop ] if ;
+  : iter  (  nq-  )
+    over 1 >= [ swap dup push for i swap dup dip next pop 2drop ] [ 2drop ] if ;
+}}
+
