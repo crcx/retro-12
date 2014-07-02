@@ -133,3 +133,15 @@ create list
 : getNumber ( "-n )  getToken toNumber ;
 : :include ( $-  ) 2 4 out wait ;
 : include  ( "-  ) getToken :include ;
+
+include opt/types.rx
+include opt/vectors.rx
+include opt/prefix.rx
+include opt/buffer.rx
+include opt/each.rx
+include opt/strings.rx
+include opt/files.rx
+
+save
+bye
+
