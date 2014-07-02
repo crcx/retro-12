@@ -17,7 +17,7 @@
 ( .. actual start of heap                                                     )
 ( ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ )
 
-include ngaro-asm.rx
+include ngaro-asm-r12.rx
 
 devector keymap:handler
 
