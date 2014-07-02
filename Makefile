@@ -1,7 +1,17 @@
 default: vm kernel
 
-full: vm kernel stage2
+full: 11 vm kernel stage2
 	./retro --shrink --with stage2.rx
+
+again: 12 vm stage2
+	./retro --with kernel.na
+	./retro --shrink --with stage2.rx
+
+11:
+	cp ngaro-asm-r11.rx ngaro-asm.rx
+
+12:
+	cp ngaro-asm-r12.rx ngaro-asm.rx
 
 vm:
 	$(CC) -Wall retro.c -o retro
